@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sign In — LiusCine</title>
+<link rel="stylesheet" href="../css/style.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  body{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;}
+  .auth-left{background:linear-gradient(160deg,#150028,#0a0018);position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:40px;}
+  .auth-left-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 30% 30%,rgba(108,0,255,0.15) 0%,transparent 60%),radial-gradient(ellipse 40% 40% at 70% 70%,rgba(139,92,246,0.08) 0%,transparent 50%);}
+  .auth-left-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(108,0,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(108,0,255,0.05) 1px,transparent 1px);background-size:50px 50px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);}
+  .auth-left-content{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:center;}
+  .auth-left-logo{position:relative;z-index:1;margin-bottom:auto;}
+  .auth-tagline{font-size:clamp(32px,4vw,52px);font-weight:900;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px;}
+  .auth-tagline span{color:var(--accent);}
+  .auth-tagline-sub{font-size:15px;color:var(--muted);font-weight:400;line-height:1.7;margin-bottom:36px;}
+  .auth-perks{display:flex;flex-direction:column;gap:14px;}
+  .auth-perk{display:flex;align-items:center;gap:14px;padding:14px 18px;background:rgba(108,0,255,0.08);border:1px solid rgba(108,0,255,0.15);border-radius:12px;}
+  .auth-perk-ico{width:40px;height:40px;background:rgba(108,0,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:16px;flex-shrink:0;}
+  .auth-perk-text h4{font-size:13px;font-weight:700;margin-bottom:2px;}
+  .auth-perk-text p{font-size:12px;color:var(--muted);font-weight:400;}
+  .auth-perk-amt{font-size:18px;font-weight:900;color:var(--green);letter-spacing:-0.5px;margin-left:auto;}
+  .auth-left-footer{position:relative;z-index:1;font-size:12px;color:var(--muted);}
+  .auth-right{background:var(--bg);display:flex;align-items:center;justify-content:center;padding:40px;position:relative;}
+  .auth-box{width:100%;max-width:400px;}
+  .auth-toggle{display:flex;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:32px;}
+  .auth-toggle-btn{flex:1;padding:10px;border:none;border-radius:8px;font-family:'Lexend',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s;}
+  .auth-toggle-btn.active{background:var(--purple-mid);color:#fff;box-shadow:0 4px 16px rgba(108,0,255,0.3);}
+  .auth-box h2{font-size:26px;font-weight:900;letter-spacing:-0.5px;margin-bottom:6px;}
+  .auth-box p{font-size:13px;color:var(--muted);font-weight:400;margin-bottom:28px;}
+  .google-btn{width:100%;padding:14px 20px;background:#fff;color:#000;border:none;border-radius:10px;font-family:'Lexend',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;transition:all 0.2s;margin-bottom:20px;}
+  .google-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,255,255,0.15);}
+  .google-ico{width:22px;height:22px;}
+  .ref-banner{background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(108,0,255,0.1));border:1px solid rgba(16,185,129,0.2);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+  .ref-banner-ico{width:40px;height:40px;background:rgba(16,185,129,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--green);font-size:18px;flex-shrink:0;}
+  .ref-banner-text strong{display:block;font-size:13px;font-weight:700;color:var(--green);}
+  .ref-banner-text span{font-size:11px;color:var(--muted);font-weight:400;}
+  .terms{font-size:12px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.6;font-weight:400;}
+  .terms a{color:var(--accent);text-decoration:none;}
+  @media(max-width:768px){body{grid-template-columns:1fr;}.auth-left{display:none;}.auth-right{padding:24px 20px;align-items:flex-start;padding-top:80px;}}
+</style>
+</head>
+<body>
+<div class="auth-left">
+  <div class="auth-left-bg"></div>
+  <div class="auth-left-grid"></div>
+  <div class="auth-left-logo">
+    <a href="../index.html" class="logo" style="font-size:26px;">Lius<span>Cine</span></a>
+  </div>
+  <div class="auth-left-content">
+    <div class="auth-tagline">Watch Free.<br/>Earn <span>Real Money.</span></div>
+    <p class="auth-tagline-sub">Join thousands of Nigerians watching free Nollywood movies and earning from referrals every day.</p>
+    <div class="auth-perks">
+      <div class="auth-perk"><div class="auth-perk-ico"><i class="fa-solid fa-clapperboard"></i></div><div class="auth-perk-text"><h4>500+ Free Movies</h4><p>Nollywood, Yoruba & African films</p></div></div>
+      <div class="auth-perk"><div class="auth-perk-ico"><i class="fa-solid fa-user-plus"></i></div><div class="auth-perk-text"><h4>Earn Per Referral</h4><p>Share your link, they sign up</p></div><span class="auth-perk-amt">₦500</span></div>
+      <div class="auth-perk"><div class="auth-perk-ico"><i class="fa-solid fa-list-check"></i></div><div class="auth-perk-text"><h4>Daily Tasks</h4><p>Complete tasks to earn more</p></div><span class="auth-perk-amt">₦100</span></div>
+      <div class="auth-perk"><div class="auth-perk-ico"><i class="fa-solid fa-building-columns"></i></div><div class="auth-perk-text"><h4>Cash Out Anytime</h4><p>Withdraw to any Nigerian bank</p></div><span class="auth-perk-amt">₦5k min</span></div>
+    </div>
+  </div>
+  <div class="auth-left-footer"><i class="fa-regular fa-copyright"></i> 2026 LiusCine · A Lius Group Product</div>
+</div>
+
+<div class="auth-right">
+  <div class="auth-box">
+    <div class="ref-banner" id="refBanner" style="display:none;">
+      <div class="ref-banner-ico"><i class="fa-solid fa-gift"></i></div>
+      <div class="ref-banner-text"><strong>You were referred! Sign up & earn bonus</strong><span>Your friend gets ₦500 when you register</span></div>
+    </div>
+    <div class="auth-toggle">
+      <button class="auth-toggle-btn active" id="loginToggle" onclick="switchTab('login')"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
+      <button class="auth-toggle-btn" id="registerToggle" onclick="switchTab('register')"><i class="fa-solid fa-user-plus"></i> Register</button>
+    </div>
+
+    <div id="loginPanel">
+      <h2>Welcome back</h2>
+      <p>Sign in to your LiusCine account</p>
+      <button class="google-btn" onclick="handleGoogleAuth()">
+        <svg class="google-ico" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+      <div class="divider-text">or sign in with email</div>
+      <div class="form-group"><label class="form-label"><i class="fa-regular fa-envelope"></i> Email Address</label><input class="input-standalone" type="email" placeholder="you@example.com"/></div>
+      <div class="form-group"><label class="form-label"><i class="fa-solid fa-lock"></i> Password</label><input class="input-standalone" type="password" placeholder="Enter your password"/></div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:20px;"><a href="#" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:600;">Forgot password?</a></div>
+      <button class="btn btn-primary btn-full btn-lg" onclick="handleEmailLogin()"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
+      <p class="terms">Don't have an account? <a href="#" onclick="switchTab('register')">Register free</a></p>
+    </div>
+
+    <div id="registerPanel" style="display:none;">
+      <h2>Join LiusCine</h2>
+      <p>Create your free account and start earning</p>
+      <button class="google-btn" onclick="handleGoogleAuth()">
+        <svg class="google-ico" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Sign Up with Google
+      </button>
+      <div class="divider-text">or register with email</div>
+      <div class="form-group"><label class="form-label"><i class="fa-solid fa-user"></i> Full Name</label><input class="input-standalone" type="text" placeholder="Your full name" id="regName"/></div>
+      <div class="form-group"><label class="form-label"><i class="fa-regular fa-envelope"></i> Email Address</label><input class="input-standalone" type="email" placeholder="you@example.com" id="regEmail"/></div>
+      <div class="form-group"><label class="form-label"><i class="fa-brands fa-whatsapp"></i> WhatsApp Number</label><input class="input-standalone" type="tel" placeholder="08012345678" id="regPhone"/></div>
+      <div class="form-group"><label class="form-label"><i class="fa-solid fa-lock"></i> Password</label><input class="input-standalone" type="password" placeholder="Create a strong password" id="regPass"/></div>
+      <div class="form-group"><label class="form-label"><i class="fa-solid fa-link"></i> Referral Code <span style="color:var(--muted);font-weight:400;">(optional)</span></label><input class="input-standalone" type="text" placeholder="Enter referral code if you have one" id="refCode"/></div>
+      <button class="btn btn-primary btn-full btn-lg" onclick="handleRegister()"><i class="fa-solid fa-user-plus"></i> Create Free Account</button>
+      <p class="terms">By signing up you agree to our <a href="#">Terms</a> & <a href="#">Privacy Policy</a></p>
+      <p class="terms" style="margin-top:8px;">Already have an account? <a href="#" onclick="switchTab('login')">Sign in</a></p>
+    </div>
+  </div>
+</div>
+
+<div class="toast"></div>
+<script src="../js/app.js"></script>
+<script>
+  function switchTab(tab) {
+    document.getElementById('loginPanel').style.display = tab==='login'?'block':'none';
+    document.getElementById('registerPanel').style.display = tab==='register'?'block':'none';
+    document.getElementById('loginToggle').classList.toggle('active', tab==='login');
+    document.getElementById('registerToggle').classList.toggle('active', tab==='register');
+  }
+  function handleGoogleAuth() {
+    showToast('Google Sign-in — connect Firebase to enable', 'info');
+    setTimeout(() => window.location.href = 'dashboard.html', 1500);
+  }
+  function handleEmailLogin() {
+    showToast('Signing in...', 'info');
+    setTimeout(() => { Auth.login({name:'Julius',email:'julius@example.com',premium:false}); window.location.href='dashboard.html'; }, 1000);
+  }
+  function handleRegister() {
+    const name = document.getElementById('regName').value;
+    const email = document.getElementById('regEmail').value;
+    if (!name || !email) { showToast('Please fill all required fields', 'error'); return; }
+    showToast('Creating your account...', 'info');
+    setTimeout(() => { Auth.login({name,email,premium:false,balance:0}); window.location.href='dashboard.html'; }, 1200);
+  }
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('ref')) { document.getElementById('refBanner').style.display='flex'; document.getElementById('refCode').value=params.get('ref'); switchTab('register'); }
+</script>
+</body>
+</html>
