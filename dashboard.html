@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard — LiusCine</title>
+<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  body{padding-top:0;}
+  .dash-layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+  .dash-main{padding:32px 36px;background:var(--bg);}
+  .dash-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px;}
+  .dash-topbar h1{font-size:24px;font-weight:900;letter-spacing:-0.5px;}
+  .dash-topbar p{font-size:13px;color:var(--muted);font-weight:400;margin-top:2px;}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+  .wallet-card{background:linear-gradient(135deg,#150028,#200040);border:1px solid var(--accent);border-radius:20px;padding:28px;position:relative;overflow:hidden;grid-column:span 2;box-shadow:0 0 40px rgba(108,0,255,0.15);}
+  .wallet-card::before{content:'₦';position:absolute;right:20px;top:10px;font-size:120px;font-weight:900;opacity:0.04;color:var(--accent);pointer-events:none;line-height:1;}
+  .wc-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+  .wc-balance{font-size:52px;font-weight:900;color:var(--accent);letter-spacing:-2px;line-height:1;}
+  .wc-sub{font-size:12px;color:var(--muted);margin:6px 0 20px;font-weight:400;}
+  .wc-progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px;}
+  .wc-progress{height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+  .wc-progress-fill{height:100%;background:linear-gradient(90deg,var(--purple-mid),var(--purple-light));border-radius:3px;}
+  .wc-actions{display:flex;gap:10px;}
+  .ref-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;grid-column:span 2;position:relative;overflow:hidden;}
+  .ref-card::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(16,185,129,0.1),transparent);border-radius:50%;}
+  .ref-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+  .ref-count{font-size:40px;font-weight:900;color:var(--green);letter-spacing:-1px;}
+  .ref-sub{font-size:12px;color:var(--muted);margin:4px 0 18px;font-weight:400;}
+  .ref-link-box{display:flex;background:var(--surface);border:1px solid var(--border2);border-radius:10px;overflow:hidden;margin-bottom:14px;}
+  .ref-link-text{flex:1;padding:10px 14px;font-size:12px;color:var(--accent);font-weight:600;word-break:break-all;}
+  .ref-copy-btn{padding:0 16px;background:var(--purple-mid);border:none;color:#fff;font-family:'Lexend',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:background 0.2s;white-space:nowrap;}
+  .ref-copy-btn:hover{background:var(--purple-glow);}
+  .ref-share-row{display:flex;gap:8px;}
+  .share-btn{flex:1;padding:9px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .share-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .dash-cols{display:grid;grid-template-columns:1fr 340px;gap:24px;margin-top:28px;}
+  .tasks-list{display:flex;flex-direction:column;gap:12px;}
+  .task-item{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:14px;transition:border-color 0.2s;}
+  .task-item:hover{border-color:var(--border2);}
+  .task-item.completed{opacity:0.5;}
+  .task-ico{width:44px;height:44px;background:rgba(108,0,255,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--accent);flex-shrink:0;}
+  .task-body{flex:1;}
+  .task-title{font-size:14px;font-weight:700;margin-bottom:3px;}
+  .task-desc{font-size:12px;color:var(--muted);font-weight:400;}
+  .task-reward{font-size:16px;font-weight:900;color:var(--green);letter-spacing:-0.5px;margin-right:12px;}
+  .task-btn{padding:8px 18px;background:var(--purple-mid);color:#fff;border:none;border-radius:8px;font-family:'Lexend',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+  .task-btn:hover{background:var(--purple-glow);}
+  .task-btn.done{background:var(--card2);color:var(--green);border:1px solid rgba(16,185,129,0.3);cursor:default;}
+  .section-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+  .section-card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  .section-card-header h3{font-size:14px;font-weight:700;}
+  .txn-row{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid rgba(45,0,82,0.3);transition:background 0.2s;}
+  .txn-row:hover{background:rgba(108,0,255,0.04);}
+  .txn-row:last-child{border-bottom:none;}
+  .txn-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .txn-dot.plus{background:rgba(16,185,129,0.1);color:var(--green);}
+  .txn-dot.minus{background:rgba(239,68,68,0.1);color:var(--red);}
+  .txn-info{flex:1;}
+  .txn-info-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+  .txn-info-date{font-size:11px;color:var(--muted);font-weight:400;}
+  .txn-info-amt{font-size:14px;font-weight:800;}
+  .lb-row{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid rgba(45,0,82,0.3);}
+  .lb-row:last-child{border-bottom:none;}
+  .lb-rank{width:24px;font-size:13px;font-weight:800;color:var(--muted);text-align:center;}
+  .lb-rank.top{color:var(--gold);}
+  .lb-avatar{width:32px;height:32px;background:var(--purple-deep);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:13px;}
+  .lb-name{flex:1;font-size:13px;font-weight:600;}
+  .lb-refs{font-size:12px;color:var(--green);font-weight:700;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+  .modal-overlay.open{opacity:1;pointer-events:all;}
+  .modal{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:32px;width:100%;max-width:420px;transform:scale(0.95);transition:transform 0.3s;}
+  .modal-overlay.open .modal{transform:scale(1);}
+  .modal h2{font-size:20px;font-weight:900;margin-bottom:6px;}
+  .modal p{font-size:13px;color:var(--muted);font-weight:400;margin-bottom:24px;}
+  .modal-close{float:right;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;}
+  @media(max-width:1200px){.stats-grid{grid-template-columns:1fr 1fr;}.wallet-card,.ref-card{grid-column:span 1;}}
+  @media(max-width:900px){.dash-cols{grid-template-columns:1fr;}.dash-main{padding:20px;}}
+
+  @media(max-width:1200px){
+    .stats-grid{grid-template-columns:1fr 1fr!important;}
+    .wallet-card,.ref-card{grid-column:span 1!important;}
+    .dash-cols{grid-template-columns:1fr!important;}
+  }
+  @media(max-width:900px){
+    .dash-layout{grid-template-columns:1fr!important;}
+    .sidebar{display:none!important;}
+    .dash-main{padding:16px!important;}
+    .dash-topbar{flex-direction:column;align-items:flex-start;gap:12px;}
+    .dash-topbar h1{font-size:20px!important;}
+    .stats-grid{grid-template-columns:1fr 1fr!important;gap:12px!important;}
+    .wc-balance{font-size:38px!important;}
+    .ref-count{font-size:32px!important;}
+    .ref-share-row{flex-wrap:wrap;}
+    .share-btn{flex:auto;min-width:calc(33% - 6px);}
+  }
+  @media(max-width:768px){
+    .dash-main{padding:14px!important;}
+    .stats-grid{grid-template-columns:1fr 1fr!important;}
+    .wc-balance{font-size:32px!important;}
+    .task-item{flex-wrap:wrap;gap:8px;}
+    .task-body{min-width:calc(100% - 100px);}
+    .task-btn{padding:7px 14px;font-size:11px;}
+    .task-reward{font-size:14px;}
+    .txn-row{flex-wrap:wrap;gap:6px;}
+    .txn-info{min-width:calc(100% - 80px);}
+    .lb-row{padding:10px 14px;}
+    .modal{padding:20px 16px!important;}
+    .modal h2{font-size:18px!important;}
+  }
+  @media(max-width:480px){
+    .dash-main{padding:12px!important;}
+    .stats-grid{grid-template-columns:1fr!important;}
+    .wallet-card,.ref-card{grid-column:span 1!important;}
+    .wc-balance{font-size:40px!important;}
+    .wc-actions{flex-wrap:wrap;gap:8px;}
+    .wc-actions .btn{flex:1;justify-content:center;}
+    .ref-link-box .ref-link-text{font-size:11px;}
+    .task-item{padding:12px;}
+    .task-ico{width:36px;height:36px;font-size:14px;}
+    .task-title{font-size:13px;}
+    .task-desc{font-size:11px;}
+    .dash-topbar .nav-right{flex-wrap:wrap;width:100%;}
+    .dash-topbar .nav-right .btn{flex:1;justify-content:center;font-size:12px;}
+  }
+  @media(max-width:360px){
+    .wc-balance{font-size:34px!important;}
+    .ref-count{font-size:28px!important;}
+    .share-btn{font-size:11px;padding:8px 6px;}
+  }
+
+
+  /* ── MOBILE NAV ── */
+  .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:6px; background:none; border:none; z-index:200; }
+  .hamburger span { width:22px; height:2px; background:var(--text); border-radius:2px; transition:all 0.3s; display:block; }
+  .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity:0; }
+  .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+  .mobile-menu {
+    display:none; position:fixed; top:60px; left:0; right:0;
+    background:var(--bg2); border-bottom:1px solid var(--border);
+    padding:16px; z-index:999; flex-direction:column; gap:4px;
+    animation:slideDown 0.25s ease;
+  }
+  @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+  .mobile-menu.open { display:flex; }
+  .mobile-menu a {
+    display:flex; align-items:center; gap:12px;
+    padding:12px 16px; border-radius:10px;
+    color:var(--text2); text-decoration:none; font-size:14px; font-weight:600;
+    transition:background 0.2s;
+  }
+  .mobile-menu a:hover { background:var(--card); color:var(--text); }
+  .mobile-menu a i { width:18px; text-align:center; color:var(--accent); }
+  .mobile-menu-actions { display:flex; gap:8px; margin-top:8px; padding-top:12px; border-top:1px solid var(--border); }
+  .mobile-menu-actions .btn { flex:1; justify-content:center; font-size:13px; }
+  @media(max-width:768px) {
+    .hamburger { display:flex; }
+    .nav-links { display:none!important; }
+    .nav-right { display:none!important; }
+  }
+
+</style>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">Lius<span>Cine</span></a>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-item active"><span class="sidebar-icon"><i class="fa-solid fa-house"></i></span> Dashboard</a>
+      <a href="movies.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-clapperboard"></i></span> Browse Movies</a>
+      <a href="#" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-users"></i></span> My Referrals</a>
+      <a href="#" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-list-check"></i></span> Tasks</a>
+      <a href="#" class="sidebar-item" onclick="document.getElementById('withdrawModal').classList.add('open')"><span class="sidebar-icon"><i class="fa-solid fa-money-bill-transfer"></i></span> Withdraw</a>
+      <a href="#" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-trophy"></i></span> Leaderboard</a>
+      <a href="#" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-crown"></i></span> My Plan</a>
+      <a href="#" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-gear"></i></span> Settings</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--card);border-radius:12px;margin-bottom:12px;">
+        <div style="width:38px;height:38px;background:var(--purple-deep);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);"><i class="fa-solid fa-user"></i></div>
+        <div><div style="font-size:13px;font-weight:700;">Julius O.</div><div style="font-size:11px;color:var(--muted);">Free Plan</div></div>
+      </div>
+      <button class="btn btn-ghost btn-full btn-sm" onclick="handleSignOut()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div><h1>Welcome back, Julius <i class="fa-solid fa-hand-wave" style="color:var(--gold)"></i></h1><p>Here's your LiusCine overview for today</p></div>
+      <div style="display:flex;gap:10px;">
+        <a href="movies.html" class="btn btn-ghost btn-sm"><i class="fa-solid fa-clapperboard"></i> Browse Movies</a>
+        <button onclick="handleUpgrade()" class="btn btn-primary btn-sm"><i class="fa-solid fa-crown"></i> Go Premium</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="wallet-card">
+        <div class="wc-label"><i class="fa-solid fa-wallet"></i> Total Earnings Wallet</div>
+        <div class="wc-balance">₦3,200</div>
+        <div class="wc-sub">₦1,800 more to unlock withdrawal</div>
+        <div class="wc-progress-label"><span>Progress to ₦5,000</span><span style="color:var(--accent)">64%</span></div>
+        <div class="wc-progress"><div class="wc-progress-fill" style="width:64%"></div></div>
+        <div class="wc-actions">
+          <button class="btn btn-primary btn-sm" onclick="document.getElementById('withdrawModal').classList.add('open')"><i class="fa-solid fa-money-bill-transfer"></i> Withdraw</button>
+          <button class="btn btn-ghost btn-sm"><i class="fa-solid fa-chart-line"></i> History</button>
+        </div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-label"><i class="fa-solid fa-link"></i> Your Referral Link</div>
+        <div class="ref-count">7</div>
+        <div class="ref-sub">Total referrals · ₦3,500 earned</div>
+        <div class="ref-link-box">
+          <div class="ref-link-text" id="refLink">liuscine.net/ref/julius007</div>
+          <button class="ref-copy-btn" onclick="copyText('liuscine.net/ref/julius007','Link copied!')"><i class="fa-solid fa-copy"></i> Copy</button>
+        </div>
+        <div class="ref-share-row">
+          <button class="share-btn" onclick="showToast('Opening WhatsApp...','info')"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+          <button class="share-btn" onclick="showToast('Opening Instagram...','info')"><i class="fa-brands fa-instagram"></i> Instagram</button>
+          <button class="share-btn" onclick="showToast('Opening TikTok...','info')"><i class="fa-brands fa-tiktok"></i> TikTok</button>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><i class="fa-solid fa-user-plus"></i> Referrals Today</div>
+        <div class="stat-value" style="color:var(--green)">2</div>
+        <div class="stat-change"><i class="fa-solid fa-arrow-up"></i> +₦1,000 earned today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><i class="fa-solid fa-list-check"></i> Tasks Completed</div>
+        <div class="stat-value" style="color:var(--accent)">5</div>
+        <div class="stat-change"><i class="fa-solid fa-arrow-up"></i> +₦500 from tasks</div>
+      </div>
+    </div>
+
+    <div class="dash-cols">
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <h2 style="font-size:16px;font-weight:800;"><i class="fa-solid fa-list-check" style="color:var(--accent)"></i> Daily Tasks</h2>
+          <span class="badge badge-gold"><i class="fa-solid fa-clock"></i> 3 tasks remaining</span>
+        </div>
+        <div class="tasks-list">
+          <div class="task-item completed checkin-task">
+            <div class="task-ico"><i class="fa-solid fa-calendar-check"></i></div>
+            <div class="task-body"><div class="task-title">Daily Check-in</div><div class="task-desc">Log in today to earn ₦50</div></div>
+            <span class="task-reward">+₦50</span>
+            <button class="task-btn done"><i class="fa-solid fa-check"></i> Done</button>
+          </div>
+          <div class="task-item">
+            <div class="task-ico"><i class="fa-brands fa-instagram"></i></div>
+            <div class="task-body"><div class="task-title">Follow on Instagram</div><div class="task-desc">Follow @lius_creative on Instagram</div></div>
+            <span class="task-reward">+₦100</span>
+            <button class="task-btn" onclick="completeTask(this, 'instagram', 'Follow on Instagram')"><i class="fa-solid fa-play"></i> Start</button>
+          </div>
+          <div class="task-item">
+            <div class="task-ico"><i class="fa-brands fa-whatsapp"></i></div>
+            <div class="task-body"><div class="task-title">Share to WhatsApp Status</div><div class="task-desc">Post your referral link to your WhatsApp status</div></div>
+            <span class="task-reward">+₦100</span>
+            <button class="task-btn" onclick="completeTask(this, 'whatsapp-status', 'Share to WhatsApp Status')"><i class="fa-solid fa-play"></i> Start</button>
+          </div>
+          <div class="task-item">
+            <div class="task-ico"><i class="fa-brands fa-tiktok"></i></div>
+            <div class="task-body"><div class="task-title">Share on TikTok</div><div class="task-desc">Post a movie recommendation on TikTok</div></div>
+            <span class="task-reward">+₦100</span>
+            <button class="task-btn" onclick="completeTask(this, 'tiktok-share', 'Share on TikTok')"><i class="fa-solid fa-play"></i> Start</button>
+          </div>
+          <div class="task-item">
+            <div class="task-ico"><i class="fa-solid fa-users"></i></div>
+            <div class="task-body"><div class="task-title">Invite 3 Friends Today</div><div class="task-desc">Get 3 people to register using your link</div></div>
+            <span class="task-reward">+₦1,500</span>
+            <button class="task-btn" onclick="completeTask(this, 'invite-3', 'Invite 3 Friends Today')"><i class="fa-solid fa-play"></i> Start</button>
+          </div>
+        </div>
+
+        <div style="margin-top:28px;" class="txn-section-wrap">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h2 style="font-size:16px;font-weight:800;"><i class="fa-solid fa-clock-rotate-left" style="color:var(--accent)"></i> Transaction History</h2>
+            <a href="#" class="see-all" style="font-size:12px;">View All <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+          <div class="section-card lb-section-card">
+            <div class="txn-row"><div class="txn-dot plus"><i class="fa-solid fa-user-plus"></i></div><div class="txn-info"><div class="txn-info-title">Referral Bonus — Chidi O.</div><div class="txn-info-date">Today, 2:14 PM</div></div><span class="txn-info-amt" style="color:var(--green)">+₦500</span></div>
+            <div class="txn-row"><div class="txn-dot plus"><i class="fa-solid fa-check"></i></div><div class="txn-info"><div class="txn-info-title">Task: Follow on Instagram</div><div class="txn-info-date">Today, 11:05 AM</div></div><span class="txn-info-amt" style="color:var(--green)">+₦100</span></div>
+            <div class="txn-row"><div class="txn-dot plus"><i class="fa-solid fa-calendar-day"></i></div><div class="txn-info"><div class="txn-info-title">Daily Check-in Bonus</div><div class="txn-info-date">Today, 9:01 AM</div></div><span class="txn-info-amt" style="color:var(--green)">+₦50</span></div>
+            <div class="txn-row"><div class="txn-dot plus"><i class="fa-solid fa-user-plus"></i></div><div class="txn-info"><div class="txn-info-title">Referral Bonus — Fatima Y.</div><div class="txn-info-date">Yesterday, 6:30 PM</div></div><span class="txn-info-amt" style="color:var(--green)">+₦500</span></div>
+            <div class="txn-row"><div class="txn-dot minus"><i class="fa-solid fa-arrow-up-from-bracket"></i></div><div class="txn-info"><div class="txn-info-title">Withdrawal — GTBank ***4521</div><div class="txn-info-date">Mar 10, 2026</div></div><span class="txn-info-amt" style="color:var(--red)">-₦5,000</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="background:linear-gradient(135deg,#150025,var(--card));border:1px solid var(--accent);border-radius:18px;padding:24px;text-align:center;margin-bottom:20px;box-shadow:0 0 32px rgba(108,0,255,0.12);">
+          <i class="fa-solid fa-crown" style="font-size:32px;color:var(--accent);margin-bottom:8px;display:block;"></i>
+          <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">Upgrade to Premium</h3>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:16px;font-weight:400;line-height:1.7;">HD downloads, zero ads, priority requests & exclusive content.</p>
+          <button class="btn btn-primary btn-full" onclick="handleUpgrade()"><i class="fa-solid fa-crown"></i> Upgrade — ₦1,000</button>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-header">
+            <h3><i class="fa-solid fa-trophy" style="color:var(--gold)"></i> Top Referrers</h3>
+            <a href="#" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:600;">Full board <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+          <div class="lb-row"><div class="lb-rank top"><i class="fa-solid fa-medal"></i></div><div class="lb-avatar"><i class="fa-solid fa-user"></i></div><div class="lb-name">Adeyemi K.</div><div class="lb-refs">48 refs</div></div>
+          <div class="lb-row"><div class="lb-rank top"><i class="fa-solid fa-medal"></i></div><div class="lb-avatar"><i class="fa-solid fa-user"></i></div><div class="lb-name">Ngozi A.</div><div class="lb-refs">35 refs</div></div>
+          <div class="lb-row"><div class="lb-rank top"><i class="fa-solid fa-medal"></i></div><div class="lb-avatar"><i class="fa-solid fa-user"></i></div><div class="lb-name">Emeka B.</div><div class="lb-refs">29 refs</div></div>
+          <div class="lb-row"><div class="lb-rank">4</div><div class="lb-avatar"><i class="fa-solid fa-user"></i></div><div class="lb-name">Fatima M.</div><div class="lb-refs">22 refs</div></div>
+          <div class="lb-row" style="background:rgba(108,0,255,0.06);"><div class="lb-rank" style="color:var(--accent)"><i class="fa-solid fa-minus"></i></div><div class="lb-avatar" style="background:var(--purple-deep);"><i class="fa-solid fa-user"></i></div><div class="lb-name" style="color:var(--accent);">You (Julius)</div><div class="lb-refs">7 refs</div></div>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-top:20px;">
+          <h3 style="font-size:14px;font-weight:700;margin-bottom:6px;"><i class="fa-solid fa-clapperboard" style="color:var(--accent)"></i> Request a Movie</h3>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:14px;font-weight:400;">Can't find a movie? Request it and we'll add it.</p>
+          <input class="input-standalone movie-request-input" placeholder="Enter movie title..." style="margin-bottom:10px;font-size:13px;"/>
+          <button class="btn btn-outline btn-full btn-sm" onclick="submitMovieRequest()"><i class="fa-solid fa-paper-plane"></i> Submit Request</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="withdrawModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('withdrawModal').classList.remove('open')"><i class="fa-solid fa-xmark"></i></button>
+    <h2><i class="fa-solid fa-money-bill-transfer" style="color:var(--accent)"></i> Withdraw Earnings</h2>
+    <p>Minimum withdrawal is ₦5,000. Your current balance: <strong style="color:var(--accent)">₦3,200</strong></p>
+    <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px 16px;font-size:13px;color:var(--red);margin-bottom:20px;font-weight:500;"><i class="fa-solid fa-triangle-exclamation"></i> You need ₦1,800 more to reach the ₦5,000 minimum. Keep referring!</div>
+    <div class="form-group"><label class="form-label"><i class="fa-solid fa-building-columns"></i> Bank Name</label><input class="input-standalone bank-input" placeholder="e.g. GTBank, Access, Opay"/></div>
+    <div class="form-group"><label class="form-label"><i class="fa-solid fa-hashtag"></i> Account Number</label><input class="input-standalone account-input" placeholder="10-digit account number"/></div>
+    <div class="form-group"><label class="form-label"><i class="fa-solid fa-naira-sign"></i> Amount (₦)</label><input class="input-standalone amount-input" placeholder="Minimum ₦5,000" type="number"/></div>
+    <button class="btn btn-primary btn-full" onclick="requestWithdrawal()"><i class="fa-solid fa-paper-plane"></i> Request Withdrawal</button>
+  </div>
+</div>
+
+<div class="toast"></div>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script type="module" src="app.js"></script>
+<script type="module">
+  // Load dashboard data from Firebase when page is ready
+  document.addEventListener("DOMContentLoaded", () => {
+    if (window.loadDashboard) {
+      window.loadDashboard();
+    } else {
+      // Retry after app.js finishes loading
+      setTimeout(() => {
+        if (window.loadDashboard) window.loadDashboard();
+      }, 500);
+    }
+  });
+</script>
+</body>
+</html>
