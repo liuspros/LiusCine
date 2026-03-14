@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Panel — LiusCine</title>
+<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  body{padding-top:0;}
+  .admin-layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+  .admin-sidebar{background:#060010;border-right:1px solid var(--border);position:fixed;top:0;left:0;width:240px;height:100vh;display:flex;flex-direction:column;z-index:100;}
+  .admin-logo{padding:20px 20px 16px;border-bottom:1px solid var(--border);}
+  .admin-logo a{font-size:20px;font-weight:900;color:var(--text);text-decoration:none;}
+  .admin-logo a span{color:var(--accent);}
+  .admin-logo p{font-size:10px;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+  .admin-nav{flex:1;padding:12px;overflow-y:auto;}
+  .admin-nav-section{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:12px 10px 6px;}
+  .admin-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all 0.2s;text-decoration:none;margin-bottom:2px;}
+  .admin-item:hover{background:var(--card);color:var(--text);}
+  .admin-item.active{background:rgba(108,0,255,0.15);color:var(--accent);}
+  .admin-item-ico{font-size:14px;width:20px;text-align:center;}
+  .admin-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;}
+  .admin-main{margin-left:240px;padding:28px 32px;background:var(--bg);min-height:100vh;}
+  .admin-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+  .admin-topbar h1{font-size:22px;font-weight:900;letter-spacing:-0.5px;}
+  .admin-topbar p{font-size:12px;color:var(--muted);margin-top:2px;font-weight:400;}
+  .admin-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px;}
+  .admin-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;}
+  .admin-stat-icon{position:absolute;right:16px;top:16px;font-size:22px;opacity:0.15;color:var(--accent);}
+  .admin-stat-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+  .admin-stat-val{font-size:26px;font-weight:900;letter-spacing:-0.5px;}
+  .admin-stat-change{font-size:11px;color:var(--green);font-weight:600;margin-top:6px;}
+  .admin-tabs{display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:24px;width:fit-content;}
+  .admin-tab-btn{padding:8px 20px;border:none;border-radius:7px;background:transparent;color:var(--muted);font-family:'Lexend',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+  .admin-tab-btn.active{background:var(--purple-mid);color:#fff;box-shadow:0 4px 12px rgba(108,0,255,0.3);}
+  .add-movie-form{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:24px;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+  .select-input{width:100%;padding:13px 16px;background:var(--surface);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'Lexend',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;cursor:pointer;}
+  .select-input:focus{border-color:var(--accent);}
+  textarea.input-standalone{resize:vertical;min-height:100px;font-family:'Lexend',sans-serif;}
+  .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+  .status-active{background:var(--green);}
+  .status-pending{background:var(--gold);}
+  .status-banned{background:var(--red);}
+  .action-btns{display:flex;gap:6px;}
+  .action-btn{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Lexend',sans-serif;border:none;transition:all 0.2s;display:flex;align-items:center;gap:4px;}
+  .action-edit{background:rgba(139,92,246,0.15);color:var(--accent);}
+  .action-edit:hover{background:rgba(139,92,246,0.25);}
+  .action-del{background:rgba(239,68,68,0.1);color:var(--red);}
+  .action-del:hover{background:rgba(239,68,68,0.2);}
+  .action-approve{background:rgba(16,185,129,0.1);color:var(--green);}
+  .action-approve:hover{background:rgba(16,185,129,0.2);}
+  .withdraw-req{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:14px;margin-bottom:10px;transition:border-color 0.2s;}
+  .withdraw-req:hover{border-color:var(--border2);}
+  .wr-ico{width:44px;height:44px;background:var(--card2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:18px;flex-shrink:0;}
+  .wr-info{flex:1;}
+  .wr-name{font-size:14px;font-weight:700;margin-bottom:3px;}
+  .wr-details{font-size:12px;color:var(--muted);font-weight:400;}
+  .wr-amount{font-size:20px;font-weight:900;color:var(--accent);margin-right:12px;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+  @media(max-width:1200px){.admin-stats{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:900px){.admin-layout{grid-template-columns:1fr;}.admin-sidebar{display:none;}.admin-main{margin-left:0;padding:20px;}}
+
+  @media(max-width:1200px){
+    .admin-stats{grid-template-columns:repeat(3,1fr)!important;}
+    .form-row-3{grid-template-columns:1fr 1fr!important;}
+  }
+  @media(max-width:900px){
+    .admin-layout{grid-template-columns:1fr!important;}
+    .admin-sidebar{display:none!important;}
+    .admin-main{margin-left:0!important;padding:16px!important;}
+    .admin-stats{grid-template-columns:1fr 1fr!important;gap:10px!important;}
+    .admin-topbar{flex-direction:column;align-items:flex-start;gap:12px;}
+    .admin-topbar h1{font-size:20px!important;}
+    .table-wrap{overflow-x:auto;}
+    .table th,.table td{white-space:nowrap;}
+    .withdraw-req{flex-wrap:wrap;gap:10px;}
+    .wr-info{min-width:calc(100% - 60px);}
+    .wr-amount{margin-left:auto;}
+    .action-btns{width:100%;justify-content:flex-end;}
+    .form-row{grid-template-columns:1fr!important;}
+    .form-row-3{grid-template-columns:1fr!important;}
+  }
+  @media(max-width:768px){
+    .admin-main{padding:12px!important;}
+    .admin-stats{grid-template-columns:1fr 1fr!important;}
+    .admin-stat{padding:14px!important;}
+    .admin-stat-val{font-size:20px!important;}
+    .admin-tabs{width:100%;overflow-x:auto;}
+    .admin-tab-btn{padding:8px 14px;font-size:12px;white-space:nowrap;}
+    .add-movie-form{padding:16px!important;}
+    .withdraw-req{padding:12px!important;}
+  }
+  @media(max-width:480px){
+    .admin-main{padding:10px!important;}
+    .admin-stats{grid-template-columns:1fr 1fr!important;gap:8px!important;}
+    .admin-stat{padding:12px!important;}
+    .admin-stat-val{font-size:18px!important;}
+    .admin-stat-label{font-size:10px!important;}
+    .admin-topbar h1{font-size:18px!important;}
+    .table th,.table td{padding:8px 10px!important;font-size:11px!important;}
+    .action-btn{font-size:10px;padding:4px 8px;}
+    .add-movie-form{padding:12px!important;}
+  }
+  @media(max-width:360px){
+    .admin-stats{grid-template-columns:1fr!important;}
+    .admin-stat-val{font-size:22px!important;}
+  }
+
+
+  /* ── MOBILE NAV ── */
+  .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:6px; background:none; border:none; z-index:200; }
+  .hamburger span { width:22px; height:2px; background:var(--text); border-radius:2px; transition:all 0.3s; display:block; }
+  .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity:0; }
+  .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+  .mobile-menu {
+    display:none; position:fixed; top:60px; left:0; right:0;
+    background:var(--bg2); border-bottom:1px solid var(--border);
+    padding:16px; z-index:999; flex-direction:column; gap:4px;
+    animation:slideDown 0.25s ease;
+  }
+  @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+  .mobile-menu.open { display:flex; }
+  .mobile-menu a {
+    display:flex; align-items:center; gap:12px;
+    padding:12px 16px; border-radius:10px;
+    color:var(--text2); text-decoration:none; font-size:14px; font-weight:600;
+    transition:background 0.2s;
+  }
+  .mobile-menu a:hover { background:var(--card); color:var(--text); }
+  .mobile-menu a i { width:18px; text-align:center; color:var(--accent); }
+  .mobile-menu-actions { display:flex; gap:8px; margin-top:8px; padding-top:12px; border-top:1px solid var(--border); }
+  .mobile-menu-actions .btn { flex:1; justify-content:center; font-size:13px; }
+  @media(max-width:768px) {
+    .hamburger { display:flex; }
+    .nav-links { display:none!important; }
+    .nav-right { display:none!important; }
+  }
+
+</style>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div class="admin-logo">
+      <a href="index.html">Lius<span>Cine</span></a>
+      <p><i class="fa-solid fa-lock"></i> Admin Panel</p>
+    </div>
+    <nav class="admin-nav">
+      <div class="admin-nav-section">Overview</div>
+      <a class="admin-item active" onclick="showPanel('dashboard',this)"><span class="admin-item-ico"><i class="fa-solid fa-chart-pie"></i></span> Dashboard</a>
+      <a class="admin-item" onclick="showPanel('movies',this)"><span class="admin-item-ico"><i class="fa-solid fa-clapperboard"></i></span> Movies</a>
+      <div class="admin-nav-section">Users</div>
+      <a class="admin-item" onclick="showPanel('users',this)"><span class="admin-item-ico"><i class="fa-solid fa-users"></i></span> All Users</a>
+      <a class="admin-item" onclick="showPanel('withdrawals',this)"><span class="admin-item-ico"><i class="fa-solid fa-money-bill-transfer"></i></span> Withdrawals <span class="admin-badge">3</span></a>
+      <div class="admin-nav-section">Content</div>
+      <a class="admin-item" onclick="showPanel('add-movie',this)"><span class="admin-item-ico"><i class="fa-solid fa-plus"></i></span> Add Movie</a>
+      <a class="admin-item" onclick="showPanel('requests',this)"><span class="admin-item-ico"><i class="fa-solid fa-inbox"></i></span> Movie Requests <span class="admin-badge">8</span></a>
+      <a class="admin-item" onclick="showPanel('tasks',this)"><span class="admin-item-ico"><i class="fa-solid fa-list-check"></i></span> Manage Tasks</a>
+      <div class="admin-nav-section">System</div>
+      <a class="admin-item" onclick="showPanel('settings',this)"><span class="admin-item-ico"><i class="fa-solid fa-gear"></i></span> Site Settings</a>
+      <a href="index.html" class="admin-item"><span class="admin-item-ico"><i class="fa-solid fa-globe"></i></span> View Website</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="admin-topbar">
+        <div><h1><i class="fa-solid fa-chart-pie" style="color:var(--accent)"></i> Dashboard Overview</h1><p>Saturday, March 14, 2026 · All systems normal</p></div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-ghost btn-sm"><i class="fa-solid fa-file-export"></i> Export</button>
+          <button class="btn btn-primary btn-sm" onclick="showPanel('add-movie')"><i class="fa-solid fa-plus"></i> Add Movie</button>
+        </div>
+      </div>
+      <div class="admin-stats">
+        <div class="admin-stat"><div class="admin-stat-icon"><i class="fa-solid fa-users"></i></div><div class="admin-stat-label">Total Users</div><div class="admin-stat-val" style="color:var(--accent)">1,248</div><div class="admin-stat-change"><i class="fa-solid fa-arrow-up"></i> +24 today</div></div>
+        <div class="admin-stat"><div class="admin-stat-icon"><i class="fa-solid fa-film"></i></div><div class="admin-stat-label">Total Movies</div><div class="admin-stat-val" style="color:var(--purple-light)">512</div><div class="admin-stat-change"><i class="fa-solid fa-arrow-up"></i> +3 this week</div></div>
+        <div class="admin-stat"><div class="admin-stat-icon"><i class="fa-solid fa-crown"></i></div><div class="admin-stat-label">Premium Users</div><div class="admin-stat-val" style="color:var(--gold)">187</div><div class="admin-stat-change"><i class="fa-solid fa-arrow-up"></i> +12 this month</div></div>
+        <div class="admin-stat"><div class="admin-stat-icon"><i class="fa-solid fa-naira-sign"></i></div><div class="admin-stat-label">Revenue (₦)</div><div class="admin-stat-val" style="color:var(--green)">187k</div><div class="admin-stat-change"><i class="fa-solid fa-arrow-up"></i> +₦12,000 today</div></div>
+        <div class="admin-stat"><div class="admin-stat-icon"><i class="fa-solid fa-download"></i></div><div class="admin-stat-label">Downloads Today</div><div class="admin-stat-val">3,401</div><div class="admin-stat-change"><i class="fa-solid fa-arrow-up"></i> 18% vs yesterday</div></div>
+      </div>
+      <h3 style="font-size:15px;font-weight:800;margin-bottom:14px;"><i class="fa-solid fa-user-plus" style="color:var(--accent)"></i> Recent Registrations</h3>
+      <div class="table-wrap" style="margin-bottom:24px;">
+        <table class="table">
+          <thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Referrals</th><th>Balance</th><th>Joined</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:700;">Adeyemi Kolade</td><td>adeyemi@gmail.com</td><td><span class="badge badge-gold"><i class="fa-solid fa-crown"></i> Premium</span></td><td style="color:var(--green)">48</td><td style="color:var(--accent)">₦24,000</td><td>Mar 14</td><td><div class="action-btns"><button class="action-btn action-edit"><i class="fa-solid fa-eye"></i> View</button><button class="action-btn action-del"><i class="fa-solid fa-ban"></i> Ban</button></div></td></tr>
+            <tr><td style="font-weight:700;">Ngozi Adeola</td><td>ngozi@yahoo.com</td><td><span class="badge badge-purple">Free</span></td><td style="color:var(--green)">35</td><td style="color:var(--accent)">₦17,500</td><td>Mar 13</td><td><div class="action-btns"><button class="action-btn action-edit"><i class="fa-solid fa-eye"></i> View</button><button class="action-btn action-del"><i class="fa-solid fa-ban"></i> Ban</button></div></td></tr>
+            <tr><td style="font-weight:700;">Julius Oyekola</td><td>julius@gmail.com</td><td><span class="badge badge-purple">Free</span></td><td style="color:var(--green)">7</td><td style="color:var(--accent)">₦3,200</td><td>Mar 12</td><td><div class="action-btns"><button class="action-btn action-edit"><i class="fa-solid fa-eye"></i> View</button><button class="action-btn action-del"><i class="fa-solid fa-ban"></i> Ban</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+        <div><div style="font-size:14px;font-weight:700;color:var(--red);margin-bottom:3px;"><i class="fa-solid fa-triangle-exclamation"></i> 3 Pending Withdrawal Requests</div><div style="font-size:12px;color:var(--muted);font-weight:400;">Total pending: ₦27,500</div></div>
+        <button class="btn btn-sm" style="background:var(--red);color:#fff;border:none;" onclick="showPanel('withdrawals')"><i class="fa-solid fa-arrow-right"></i> Review Now</button>
+      </div>
+    </div>
+
+    <!-- ADD MOVIE -->
+    <div class="panel" id="panel-add-movie">
+      <div class="admin-topbar"><div><h1><i class="fa-solid fa-plus" style="color:var(--accent)"></i> Add New Movie</h1><p>Upload movie details and download links</p></div><button class="btn btn-ghost btn-sm" onclick="showPanel('movies')"><i class="fa-solid fa-arrow-left"></i> Back to Movies</button></div>
+      <div class="add-movie-form">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:20px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;"><i class="fa-solid fa-circle-info"></i> Movie Information</h3>
+        <div class="form-row" style="margin-bottom:16px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-solid fa-film"></i> Movie Title *</label><input class="input-standalone" placeholder="e.g. King of Boys 3" class="input-standalone movie-title-input"/></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-regular fa-calendar"></i> Year *</label><input class="input-standalone" placeholder="2024" type="number" class="input-standalone movie-year-input"/></div>
+        </div>
+        <div class="form-row" style="margin-bottom:16px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-solid fa-tags"></i> Genre *</label><select class="select-input movie-genre-input"><option>Action</option><option>Romance</option><option>Comedy</option><option>Drama</option><option>Thriller</option><option>Yoruba</option><option>Series</option></select></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-solid fa-language"></i> Language</label><select class="select-input movie-lang-input"><option>English</option><option>Yoruba</option><option>Igbo</option><option>Hausa</option><option>Pidgin</option></select></div>
+        </div>
+        <div class="form-row" style="margin-bottom:16px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-solid fa-video"></i> Director</label><input class="input-standalone" placeholder="Director name" class="input-standalone movie-director-input"/></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-regular fa-clock"></i> Duration</label><input class="input-standalone" placeholder="e.g. 2h 15m" class="input-standalone movie-duration-input"/></div>
+        </div>
+        <div class="form-group"><label class="form-label"><i class="fa-solid fa-align-left"></i> Synopsis</label><textarea class="input-standalone" placeholder="Write a short description of the movie..." class="input-standalone movie-synopsis-input"></textarea></div>
+        <div class="divider"></div>
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:20px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;"><i class="fa-solid fa-lock"></i> Access & Visibility</h3>
+        <div class="form-row" style="margin-bottom:16px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-solid fa-unlock"></i> Access Level</label><select class="select-input movie-access-input"><option value="free">Free — Available to all</option><option value="premium">Premium — Members only</option></select></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-solid fa-star"></i> Rating (out of 10)</label><input class="input-standalone" placeholder="e.g. 8.2" type="number" step="0.1" class="input-standalone movie-rating-input"/></div>
+        </div>
+        <div class="divider"></div>
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:20px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;"><i class="fa-brands fa-telegram"></i> Download Links (Telegram)</h3>
+        <div class="form-row-3" style="margin-bottom:16px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label">360p Link (Free)</label><input class="input-standalone" placeholder="https://t.me/..."/></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label">480p Link (Free)</label><input class="input-standalone" placeholder="https://t.me/..."/></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label">720p HD Link (Premium)</label><input class="input-standalone" placeholder="https://t.me/..."/></div>
+        </div>
+        <div class="form-group"><label class="form-label"><i class="fa-brands fa-youtube"></i> YouTube Embed Link (for streaming)</label><input class="input-standalone" placeholder="https://www.youtube.com/embed/..." class="input-standalone movie-youtube-input"/></div>
+        <div style="display:flex;gap:12px;margin-top:24px;">
+          <button class="btn btn-primary btn-lg" onclick="addMovieToDb()" class="add-movie-btn btn btn-primary btn-lg"><i class="fa-solid fa-plus"></i> Add Movie</button>
+          <button class="btn btn-ghost btn-lg" onclick="showPanel('movies')"><i class="fa-solid fa-xmark"></i> Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOVIES -->
+    <div class="panel" id="panel-movies">
+      <div class="admin-topbar"><div><h1><i class="fa-solid fa-clapperboard" style="color:var(--accent)"></i> All Movies</h1><p>512 movies in the library</p></div><button class="btn btn-primary btn-sm" onclick="showPanel('add-movie')"><i class="fa-solid fa-plus"></i> Add Movie</button></div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Title</th><th>Genre</th><th>Year</th><th>Access</th><th>Downloads</th><th>Rating</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:700;">King of Boys 3</td><td>Action</td><td>2024</td><td><span class="badge badge-free">FREE</span></td><td>12,450</td><td style="color:var(--gold)"><i class="fa-solid fa-star"></i> 8.2</td><td><div class="action-btns"><button class="action-btn action-edit" onclick="showPanel('add-movie')"><i class="fa-solid fa-pen"></i> Edit</button><button class="action-btn action-del"><i class="fa-solid fa-trash"></i> Delete</button></div></td></tr>
+            <tr><td style="font-weight:700;">Gangs of Lagos 2</td><td>Crime</td><td>2024</td><td><span class="badge badge-free">FREE</span></td><td>9,821</td><td style="color:var(--gold)"><i class="fa-solid fa-star"></i> 7.9</td><td><div class="action-btns"><button class="action-btn action-edit"><i class="fa-solid fa-pen"></i> Edit</button><button class="action-btn action-del"><i class="fa-solid fa-trash"></i> Delete</button></div></td></tr>
+            <tr><td style="font-weight:700;">The Black Book</td><td>Thriller</td><td>2023</td><td><span class="badge badge-free">FREE</span></td><td>15,602</td><td style="color:var(--gold)"><i class="fa-solid fa-star"></i> 8.4</td><td><div class="action-btns"><button class="action-btn action-edit"><i class="fa-solid fa-pen"></i> Edit</button><button class="action-btn action-del"><i class="fa-solid fa-trash"></i> Delete</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- WITHDRAWALS -->
+    <div class="panel" id="panel-withdrawals">
+      <div class="admin-topbar"><div><h1><i class="fa-solid fa-money-bill-transfer" style="color:var(--accent)"></i> Withdrawal Requests</h1><p>3 pending · Total: ₦27,500</p></div></div>
+      <div class="withdraw-req"><div class="wr-ico"><i class="fa-solid fa-user"></i></div><div class="wr-info"><div class="wr-name">Adeyemi Kolade</div><div class="wr-details"><i class="fa-solid fa-building-columns"></i> GTBank · 0012345678 · Mar 14, 2026 at 3:12 PM</div></div><span class="wr-amount">₦10,000</span><div class="action-btns"><button class="action-btn action-approve" onclick="showToast('Withdrawal approved!','success')"><i class="fa-solid fa-check"></i> Approve</button><button class="action-btn action-del" onclick="showToast('Withdrawal rejected','error')"><i class="fa-solid fa-xmark"></i> Reject</button></div></div>
+      <div class="withdraw-req"><div class="wr-ico"><i class="fa-solid fa-user"></i></div><div class="wr-info"><div class="wr-name">Ngozi Adeola</div><div class="wr-details"><i class="fa-solid fa-building-columns"></i> Access Bank · 0023456789 · Mar 13, 2026 at 7:45 PM</div></div><span class="wr-amount">₦12,500</span><div class="action-btns"><button class="action-btn action-approve" onclick="showToast('Withdrawal approved!','success')"><i class="fa-solid fa-check"></i> Approve</button><button class="action-btn action-del"><i class="fa-solid fa-xmark"></i> Reject</button></div></div>
+      <div class="withdraw-req"><div class="wr-ico"><i class="fa-solid fa-user"></i></div><div class="wr-info"><div class="wr-name">Emeka Okonkwo</div><div class="wr-details"><i class="fa-solid fa-building-columns"></i> Opay · 0034567890 · Mar 13, 2026 at 11:20 AM</div></div><span class="wr-amount">₦5,000</span><div class="action-btns"><button class="action-btn action-approve" onclick="showToast('Withdrawal approved!','success')"><i class="fa-solid fa-check"></i> Approve</button><button class="action-btn action-del"><i class="fa-solid fa-xmark"></i> Reject</button></div></div>
+    </div>
+
+    <!-- REQUESTS -->
+    <div class="panel" id="panel-requests">
+      <div class="admin-topbar"><div><h1><i class="fa-solid fa-inbox" style="color:var(--accent)"></i> Movie Requests</h1><p>8 pending requests from users</p></div></div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Movie Title</th><th>Requested By</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:700;">A Tribe Called Judah 2</td><td>Taiwo A.</td><td>Mar 14</td><td><span class="badge badge-gold"><i class="fa-solid fa-clock"></i> Pending</span></td><td><div class="action-btns"><button class="action-btn action-approve" onclick="showToast('Request approved!','success')"><i class="fa-solid fa-check"></i> Approve</button><button class="action-btn action-del"><i class="fa-solid fa-xmark"></i> Reject</button></div></td></tr>
+            <tr><td style="font-weight:700;">Funmilayo Ransome-Kuti</td><td>Emeka B.</td><td>Mar 13</td><td><span class="badge badge-gold"><i class="fa-solid fa-clock"></i> Pending</span></td><td><div class="action-btns"><button class="action-btn action-approve" onclick="showToast('Request approved!','success')"><i class="fa-solid fa-check"></i> Approve</button><button class="action-btn action-del"><i class="fa-solid fa-xmark"></i> Reject</button></div></td></tr>
+            <tr><td style="font-weight:700;">Brotherhood 2</td><td>Fatima Y.</td><td>Mar 12</td><td><span class="badge badge-green"><i class="fa-solid fa-check"></i> Approved</span></td><td><div class="action-btns"><button class="action-btn action-edit"><i class="fa-solid fa-film"></i> Added</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="panel" id="panel-users">
+      <div class="admin-topbar"><div><h1><i class="fa-solid fa-users" style="color:var(--accent)"></i> All Users</h1><p>1,248 registered users</p></div></div>
+      <div style="display:flex;gap:12px;margin-bottom:20px;">
+        <div class="input-wrap" style="flex:1;"><input class="input" placeholder="Search users by name, email..."/><button style="padding:0 20px;background:var(--purple-mid);border:none;color:#fff;cursor:pointer;"><i class="fa-solid fa-search"></i></button></div>
+        <select class="select-input" style="width:160px;"><option>All Plans</option><option>Free</option><option>Premium</option></select>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Referrals</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:700;">Adeyemi Kolade</td><td>adeyemi@gmail.com</td><td><span class="badge badge-gold"><i class="fa-solid fa-crown"></i> Premium</span></td><td style="color:var(--green)">48</td><td>₦24,000</td><td><span class="status-dot status-active"></span>Active</td><td><div class="action-btns"><button class="action-btn action-edit"><i class="fa-solid fa-eye"></i></button><button class="action-btn action-del"><i class="fa-solid fa-ban"></i></button></div></td></tr>
+            <tr><td style="font-weight:700;">Ngozi Adeola</td><td>ngozi@yahoo.com</td><td><span class="badge badge-purple">Free</span></td><td style="color:var(--green)">35</td><td>₦17,500</td><td><span class="status-dot status-active"></span>Active</td><td><div class="action-btns"><button class="action-btn action-edit"><i class="fa-solid fa-eye"></i></button><button class="action-btn action-del"><i class="fa-solid fa-ban"></i></button></div></td></tr>
+            <tr><td style="font-weight:700;">Julius Oyekola</td><td>julius@gmail.com</td><td><span class="badge badge-purple">Free</span></td><td style="color:var(--green)">7</td><td>₦3,200</td><td><span class="status-dot status-active"></span>Active</td><td><div class="action-btns"><button class="action-btn action-edit"><i class="fa-solid fa-eye"></i></button><button class="action-btn action-del"><i class="fa-solid fa-ban"></i></button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="panel" id="panel-settings">
+      <div class="admin-topbar"><div><h1><i class="fa-solid fa-gear" style="color:var(--accent)"></i> Site Settings</h1><p>Manage LiusCine configuration</p></div></div>
+      <div class="add-movie-form">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:20px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;"><i class="fa-solid fa-coins"></i> Earnings Configuration</h3>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label"><i class="fa-solid fa-user-plus"></i> Referral Bonus (₦)</label><input class="input-standalone" value="500" type="number"/></div>
+          <div class="form-group"><label class="form-label"><i class="fa-solid fa-list-check"></i> Task Reward (₦)</label><input class="input-standalone" value="100" type="number"/></div>
+          <div class="form-group"><label class="form-label"><i class="fa-solid fa-calendar-check"></i> Daily Check-in (₦)</label><input class="input-standalone" value="50" type="number"/></div>
+          <div class="form-group"><label class="form-label"><i class="fa-solid fa-money-bill-transfer"></i> Minimum Withdrawal (₦)</label><input class="input-standalone" value="5000" type="number"/></div>
+        </div>
+        <div class="divider"></div>
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:20px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;"><i class="fa-solid fa-crown"></i> Subscription</h3>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label"><i class="fa-solid fa-naira-sign"></i> Premium Price (₦/month)</label><input class="input-standalone" value="1000" type="number"/></div>
+          <div class="form-group"><label class="form-label"><i class="fa-solid fa-globe"></i> Site Name</label><input class="input-standalone" value="LiusCine"/></div>
+        </div>
+        <div class="form-group"><label class="form-label"><i class="fa-brands fa-whatsapp"></i> Admin WhatsApp</label><input class="input-standalone" value="+2349161976673"/></div>
+        <button class="btn btn-primary btn-lg" onclick="showToast('Settings saved!','success')"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button>
+      </div>
+    </div>
+
+    <!-- TASKS -->
+    <div class="panel" id="panel-tasks">
+      <div class="admin-topbar"><div><h1><i class="fa-solid fa-list-check" style="color:var(--accent)"></i> Manage Tasks</h1><p>Create and manage daily earning tasks</p></div><button class="btn btn-primary btn-sm" onclick="showToast('Task creation coming...','info')"><i class="fa-solid fa-plus"></i> Add Task</button></div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Task Name</th><th>Reward</th><th>Completions</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:700;"><i class="fa-solid fa-calendar-check" style="color:var(--accent)"></i> Daily Check-in</td><td style="color:var(--green)">₦50</td><td>1,102</td><td><span class="badge badge-green"><i class="fa-solid fa-circle"></i> Active</span></td><td><div class="action-btns"><button class="action-btn action-edit"><i class="fa-solid fa-pen"></i> Edit</button><button class="action-btn action-del"><i class="fa-solid fa-pause"></i> Disable</button></div></td></tr>
+            <tr><td style="font-weight:700;"><i class="fa-brands fa-instagram" style="color:var(--accent)"></i> Follow on Instagram</td><td style="color:var(--green)">₦100</td><td>843</td><td><span class="badge badge-green"><i class="fa-solid fa-circle"></i> Active</span></td><td><div class="action-btns"><button class="action-btn action-edit"><i class="fa-solid fa-pen"></i> Edit</button><button class="action-btn action-del"><i class="fa-solid fa-pause"></i> Disable</button></div></td></tr>
+            <tr><td style="font-weight:700;"><i class="fa-brands fa-whatsapp" style="color:var(--accent)"></i> Share to WhatsApp</td><td style="color:var(--green)">₦100</td><td>612</td><td><span class="badge badge-green"><i class="fa-solid fa-circle"></i> Active</span></td><td><div class="action-btns"><button class="action-btn action-edit"><i class="fa-solid fa-pen"></i> Edit</button><button class="action-btn action-del"><i class="fa-solid fa-pause"></i> Disable</button></div></td></tr>
+            <tr><td style="font-weight:700;"><i class="fa-brands fa-tiktok" style="color:var(--accent)"></i> Share on TikTok</td><td style="color:var(--green)">₦100</td><td>389</td><td><span class="badge badge-gold"><i class="fa-solid fa-pause"></i> Paused</span></td><td><div class="action-btns"><button class="action-btn action-approve" onclick="showToast('Task enabled!','success')"><i class="fa-solid fa-play"></i> Enable</button><button class="action-btn action-del"><i class="fa-solid fa-trash"></i> Delete</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast"></div>
+<script type="module">
+  // ── ADMIN AUTH GUARD ──────────────────────
+  // Use getApps() to avoid double-init conflict with app.js
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBnPxRn13A1bEo901P8O3VE5X_nKvclFpI",
+    authDomain: "liuspros.firebaseapp.com",
+    projectId: "liuspros",
+    storageBucket: "liuspros.firebasestorage.app",
+    messagingSenderId: "1072846880138",
+    appId: "1:1072846880138:web:d095b5196563844e9edc73"
+  };
+
+  const ADMIN_EMAIL = "liuscreatives@gmail.com";
+
+  // Only initialise once — reuse existing app if already created
+  const firebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  const auth = getAuth(firebaseApp);
+  const db   = getFirestore(firebaseApp);
+
+  // Hide page while checking — prevents flash of content for non-admins
+  document.body.style.opacity = '0';
+  document.body.style.transition = 'opacity 0.3s';
+
+  // Give Firebase 5 seconds max to resolve auth state
+  let authResolved = false;
+  const authTimeout = setTimeout(() => {
+    if (!authResolved) window.location.replace("admin-login.html");
+  }, 5000);
+
+  onAuthStateChanged(auth, (user) => {
+    authResolved = true;
+    clearTimeout(authTimeout);
+
+    if (!user || user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+      window.location.replace("admin-login.html");
+      return;
+    }
+
+    // ✅ Admin confirmed — reveal page
+    document.body.style.opacity = '1';
+    loadAdminStats();
+  });
+
+  // ── LOAD ADMIN STATS FROM FIRESTORE ──
+  async function loadAdminStats() {
+    try {
+      // Count users
+      const usersSnap = await getDocs(collection(db, "users"));
+      const premiumCount = usersSnap.docs.filter(d => d.data().premium).length;
+
+      // Count movies
+      const moviesSnap = await getDocs(collection(db, "movies"));
+
+      // Count pending withdrawals
+      const wSnap = await getDocs(query(collection(db, "withdrawals"), where("status","==","pending")));
+      const pendingAmt = wSnap.docs.reduce((s,d) => s + (d.data().amount||0), 0);
+
+      // Revenue from premiums
+      const txSnap = await getDocs(query(collection(db,"transactions"), where("type","==","premium")));
+      const revenue = txSnap.docs.reduce((s,d) => s + (d.data().amount||0), 0);
+
+      // Update stat cards
+      const stats = document.querySelectorAll('.admin-stat-val');
+      if (stats[0]) stats[0].textContent = usersSnap.size.toLocaleString();
+      if (stats[1]) stats[1].textContent = moviesSnap.size.toLocaleString();
+      if (stats[2]) stats[2].textContent = premiumCount.toLocaleString();
+      if (stats[3]) stats[3].textContent = '₦' + revenue.toLocaleString();
+      if (stats[4]) stats[4].textContent = wSnap.size;
+
+      // Update withdrawal badge
+      const badge = document.querySelector('.admin-badge');
+      if (badge && wSnap.size > 0) badge.textContent = wSnap.size;
+
+      // Withdrawal alert banner
+      const alertEl = document.querySelector('.withdrawal-alert');
+      if (alertEl && wSnap.size > 0) {
+        alertEl.style.display = 'flex';
+        alertEl.querySelector('.alert-count').textContent = wSnap.size;
+        alertEl.querySelector('.alert-amount').textContent = '₦' + pendingAmt.toLocaleString();
+      }
+
+      // Load recent users table
+      const recentQ = query(collection(db, "users"), orderBy("joinedAt","desc"), limit(10));
+      const recentSnap = await getDocs(recentQ);
+      const tbody = document.querySelector('#panel-dashboard .table tbody');
+      if (tbody && recentSnap.size > 0) {
+        tbody.innerHTML = recentSnap.docs.map(d => {
+          const u = d.data();
+          const date = u.joinedAt?.toDate?.()?.toLocaleDateString('en-NG',{day:'numeric',month:'short'}) || '—';
+          return `<tr>
+            <td style="font-weight:700">${u.name||'—'}</td>
+            <td>${u.email||'—'}</td>
+            <td>${u.premium ? '<span class="badge badge-gold"><i class="fa-solid fa-crown"></i> Premium</span>' : '<span class="badge badge-purple">Free</span>'}</td>
+            <td style="color:var(--green)">${u.referrals||0}</td>
+            <td style="color:var(--accent)">₦${(u.balance||0).toLocaleString()}</td>
+            <td>${date}</td>
+            <td><div class="action-btns"><button class="action-btn action-edit" onclick="showToast('Feature coming soon','info')"><i class="fa-solid fa-eye"></i> View</button></div></td>
+          </tr>`;
+        }).join('');
+      }
+
+      // Load pending withdrawals panel
+      const wPanel = document.getElementById('panel-withdrawals');
+      if (wPanel && wSnap.size > 0) {
+        const existing = wPanel.querySelector('.admin-topbar');
+        let wHtml = existing ? existing.outerHTML : '';
+        wHtml += wSnap.docs.map(d => {
+          const w = d.data();
+          const date = w.requestedAt?.toDate?.()?.toLocaleDateString('en-NG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) || '—';
+          return `<div class="withdraw-req" data-wid="${d.id}">
+            <div class="wr-ico"><i class="fa-solid fa-user"></i></div>
+            <div class="wr-info">
+              <div class="wr-name">${w.userName||'—'}</div>
+              <div class="wr-details"><i class="fa-solid fa-building-columns"></i> ${w.bank||'—'} · ${w.accountNumber||'—'} · ${date}</div>
+            </div>
+            <span class="wr-amount">₦${(w.amount||0).toLocaleString()}</span>
+            <div class="action-btns">
+              <button class="action-btn action-approve" onclick="approveWithdrawal('${d.id}', this)"><i class="fa-solid fa-check"></i> Approve</button>
+              <button class="action-btn action-del" onclick="rejectWithdrawal('${d.id}', this)"><i class="fa-solid fa-xmark"></i> Reject</button>
+            </div>
+          </div>`;
+        }).join('');
+        wPanel.innerHTML = wHtml;
+      }
+
+    } catch(e) {
+      console.error("Admin load error:", e);
+    }
+  }
+
+  // Approve withdrawal
+  window.approveWithdrawal = async function(docId, btn) {
+    if (!confirm('Confirm you have sent this payment to the user?')) return;
+    try {
+      const { updateDoc, doc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js");
+      await updateDoc(doc(db,"withdrawals",docId), { status:'approved', processedAt: serverTimestamp() });
+      btn.closest('[data-wid]').remove();
+      showToast('Withdrawal approved and marked as paid ✅', 'success');
+    } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  };
+
+  // Reject withdrawal — refunds user balance
+  window.rejectWithdrawal = async function(docId, btn) {
+    const reason = prompt('Reason for rejection (will not be shown to user):');
+    if (reason === null) return;
+    try {
+      const { updateDoc, doc, increment, serverTimestamp, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js");
+      const wSnap = await getDoc(doc(db,"withdrawals",docId));
+      const w = wSnap.data();
+      // Refund balance
+      await updateDoc(doc(db,"users",w.userId), { balance: increment(w.amount) });
+      await updateDoc(doc(db,"withdrawals",docId), { status:'rejected', reason, processedAt: serverTimestamp() });
+      btn.closest('[data-wid]').remove();
+      showToast('Withdrawal rejected — balance refunded to user ✅', 'info');
+    } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  };
+
+  // Admin sign out
+  window.adminSignOut = async function() {
+    if (!confirm('Sign out of admin panel?')) return;
+    const { signOut } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js");
+    await signOut(auth);
+    window.location.href = 'admin-login.html';
+  };
+
+  // Show toast (standalone so it works without app.js)
+  window.showToast = window.showToast || function(msg, type='success') {
+    let t = document.querySelector('.toast');
+    if (!t) { t = document.createElement('div'); t.className='toast'; document.body.appendChild(t); }
+    const icons = {success:'✅',error:'❌',info:'ℹ️'};
+    t.textContent = `${icons[type]||''} ${msg}`;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  };
+</script>
+<script>
+  function showPanel(name, el) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.admin-item').forEach(i => i.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    if (el) el.classList.add('active');
+  }
+
+  async function adminSignOut() {
+    if (!confirm('Sign out of admin panel?')) return;
+    const { getAuth, signOut } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js");
+    const { initializeApp, getApps } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js");
+    const apps = getApps();
+    const auth = getAuth(apps[0]);
+    await signOut(auth);
+    window.location.href = 'admin-login.html';
+  }
+</script>
+</body>
+</html>
