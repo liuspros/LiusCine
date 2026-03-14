@@ -171,9 +171,46 @@
     document.getElementById('loginToggle').classList.toggle('active', tab==='login');
     document.getElementById('registerToggle').classList.toggle('active', tab==='register');
   }
-  function handleGoogleAuth() {
-    showToast('Google Sign-in — connect Firebase to enable', 'info');
-    setTimeout(() => window.location.href = 'dashboard.html', 1500);
+  async function handleGoogleAuth() {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+
+    // Check if user already exists in database
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      // New user — create their record
+      const refCode = new URLSearchParams(window.location.search).get('ref') || null;
+
+      await setDoc(userRef, {
+        name: user.displayName,
+        email: user.email,
+        photo: user.photoURL,
+        uid: user.uid,
+        balance: 0,
+        referrals: 0,
+        premium: false,
+        referredBy: refCode,
+        joinedAt: serverTimestamp()
+      });
+
+      // Credit the referrer ₦500
+      if (refCode) {
+        const referrerRef = doc(db, "users", refCode);
+        await updateDoc(referrerRef, {
+          balance: increment(500),
+          referrals: increment(1)
+        });
+      }
+    }
+
+    window.location.href = "dashboard.html";
+  } catch (error) {
+    showToast("Sign in failed: " + error.message, "error");
+  }
+}
   }
   function handleEmailLogin() {
     showToast('Signing in...', 'info');
