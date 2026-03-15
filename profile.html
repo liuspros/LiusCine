@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Profile — LiusCine</title>
+<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  body{padding-top:0;}
+  .dash-layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+  .profile-main{padding:32px 36px;background:var(--bg);}
+  .profile-hero{background:linear-gradient(135deg,#150028,#0a0018);border:1px solid var(--border);border-radius:20px;padding:36px;display:flex;align-items:center;gap:28px;margin-bottom:28px;position:relative;overflow:hidden;}
+  .profile-hero::before{content:'';position:absolute;right:-60px;top:-60px;width:240px;height:240px;background:radial-gradient(circle,rgba(108,0,255,0.12),transparent);border-radius:50%;}
+  .avatar-wrap{position:relative;flex-shrink:0;}
+  .avatar{width:88px;height:88px;background:var(--purple-deep);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--accent);border:3px solid var(--border2);overflow:hidden;}
+  .avatar img{width:100%;height:100%;object-fit:cover;}
+  .premium-crown{position:absolute;bottom:-4px;right:-4px;width:28px;height:28px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid var(--bg);}
+  .profile-info h2{font-size:22px;font-weight:900;letter-spacing:-0.5px;margin-bottom:4px;}
+  .profile-info p{font-size:13px;color:var(--muted);font-weight:400;margin-bottom:12px;}
+  .profile-badges{display:flex;gap:8px;flex-wrap:wrap;}
+  .profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .profile-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;}
+  .profile-card h3{font-size:14px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+  .profile-card h3 i{color:var(--accent);}
+  .form-group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .form-label{font-size:12px;font-weight:600;color:var(--text2);}
+  .bank-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .save-btn{width:100%;padding:12px;background:var(--purple-mid);color:#fff;border:none;border-radius:10px;font-family:'Lexend',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;}
+  .save-btn:hover{background:var(--purple-glow);}
+  .stat-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);}
+  .stat-row:last-child{border-bottom:none;}
+  .stat-row-label{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px;}
+  .stat-row-val{font-size:14px;font-weight:700;}
+  .danger-zone{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:16px 20px;margin-top:16px;}
+  .danger-zone h4{font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px;}
+  .danger-zone p{font-size:12px;color:var(--muted);margin-bottom:12px;font-weight:400;}
+  @media(max-width:900px){.dash-layout{grid-template-columns:1fr;}.sidebar{display:none;}.profile-main{padding:20px 16px;}.profile-grid{grid-template-columns:1fr;}.profile-hero{flex-direction:column;text-align:center;}.bank-row{grid-template-columns:1fr;}}
+</style>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script>
+if (!firebase.apps.length) {
+  firebase.initializeApp({apiKey:"AIzaSyBnPxRn13A1bEo901P8O3VE5X_nKvclFpI",authDomain:"liuspros.firebaseapp.com",projectId:"liuspros",storageBucket:"liuspros.firebasestorage.app",messagingSenderId:"1072846880138",appId:"1:1072846880138:web:d095b5196563844e9edc73"});
+}
+function showToast(msg,type){var t=document.querySelector('.toast');if(!t)return;var icons={success:'✅',error:'❌',info:'ℹ️'};t.textContent=(icons[type]||'')+' '+msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},3500);}
+function handleSignOut(){firebase.auth().signOut().then(function(){window.location.href='index.html';});}
+</script>
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">Lius<span>Cine</span></a>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-house"></i></span> Dashboard</a>
+      <a href="movies.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-clapperboard"></i></span> Browse Movies</a>
+      <a href="watchlist.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-bookmark"></i></span> My Watchlist</a>
+      <a href="referrals.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-users"></i></span> My Referrals</a>
+      <a href="withdrawals.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-clock-rotate-left"></i></span> Withdrawal History</a>
+      <a href="profile.html" class="sidebar-item active"><span class="sidebar-icon"><i class="fa-solid fa-user"></i></span> My Profile</a>
+      <a href="leaderboard.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-trophy"></i></span> Leaderboard</a>
+      <a href="#" class="sidebar-item" onclick="handleSignOut()"><span class="sidebar-icon"><i class="fa-solid fa-right-from-bracket"></i></span> Sign Out</a>
+    </nav>
+  </aside>
+
+  <main class="profile-main">
+    <div class="profile-hero">
+      <div class="avatar-wrap">
+        <div class="avatar" id="profileAvatar"><i class="fa-solid fa-user"></i></div>
+        <div class="premium-crown" id="premiumCrown" style="display:none"><i class="fa-solid fa-crown" style="color:#000;font-size:10px"></i></div>
+      </div>
+      <div class="profile-info">
+        <h2 id="profileName">Loading...</h2>
+        <p id="profileEmail">—</p>
+        <div class="profile-badges">
+          <span class="badge badge-purple" id="planBadge">Free Plan</span>
+          <span class="badge badge-green" id="joinedBadge">Joined —</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-grid">
+      <!-- Personal Info -->
+      <div class="profile-card">
+        <h3><i class="fa-solid fa-user"></i> Personal Information</h3>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input class="input-standalone" id="editName" placeholder="Your full name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">WhatsApp Number</label>
+          <input class="input-standalone" id="editPhone" placeholder="08012345678" type="tel"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input class="input-standalone" id="editEmail" placeholder="you@example.com" type="email" readonly style="opacity:0.6;cursor:not-allowed"/>
+          <span style="font-size:11px;color:var(--muted);">Email cannot be changed</span>
+        </div>
+        <button class="save-btn" onclick="saveProfile()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+      </div>
+
+      <!-- Bank Details -->
+      <div class="profile-card">
+        <h3><i class="fa-solid fa-building-columns"></i> Bank Details</h3>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:16px;font-weight:400;">Save your bank details so you don't retype them every withdrawal.</p>
+        <div class="form-group">
+          <label class="form-label">Bank Name</label>
+          <select class="input-standalone" id="editBank">
+            <option value="">Select your bank</option>
+            <option>GTBank</option><option>Access Bank</option><option>First Bank</option>
+            <option>Zenith Bank</option><option>UBA</option><option>Sterling Bank</option>
+            <option>Opay</option><option>Palmpay</option><option>Kuda</option>
+            <option>Moniepoint</option><option>Wema Bank</option><option>Fidelity Bank</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Account Number</label>
+          <input class="input-standalone" id="editAccountNumber" placeholder="10-digit account number" maxlength="10" type="tel"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Account Name</label>
+          <input class="input-standalone" id="editAccountName" placeholder="As it appears on your bank app"/>
+        </div>
+        <button class="save-btn" onclick="saveBankDetails()"><i class="fa-solid fa-floppy-disk"></i> Save Bank Details</button>
+      </div>
+
+      <!-- Account Stats -->
+      <div class="profile-card">
+        <h3><i class="fa-solid fa-chart-bar"></i> Account Stats</h3>
+        <div class="stat-row"><span class="stat-row-label"><i class="fa-solid fa-wallet"></i> Total Earned</span><span class="stat-row-val" id="statTotalEarned" style="color:var(--accent)">₦0</span></div>
+        <div class="stat-row"><span class="stat-row-label"><i class="fa-solid fa-users"></i> Total Referrals</span><span class="stat-row-val" id="statReferrals" style="color:var(--green)">0</span></div>
+        <div class="stat-row"><span class="stat-row-label"><i class="fa-solid fa-list-check"></i> Tasks Done</span><span class="stat-row-val" id="statTasks">0</span></div>
+        <div class="stat-row"><span class="stat-row-label"><i class="fa-solid fa-download"></i> Downloads</span><span class="stat-row-val" id="statDownloads">0</span></div>
+        <div class="stat-row"><span class="stat-row-label"><i class="fa-solid fa-crown"></i> Plan</span><span class="stat-row-val" id="statPlan">Free</span></div>
+        <div class="stat-row"><span class="stat-row-label"><i class="fa-solid fa-calendar"></i> Member Since</span><span class="stat-row-val" id="statJoined">—</span></div>
+      </div>
+
+      <!-- Security -->
+      <div class="profile-card">
+        <h3><i class="fa-solid fa-shield-halved"></i> Security</h3>
+        <div class="stat-row"><span class="stat-row-label"><i class="fa-solid fa-envelope"></i> Email Verified</span><span class="stat-row-val" id="emailVerified" style="color:var(--green)">—</span></div>
+        <div class="stat-row"><span class="stat-row-label"><i class="fa-brands fa-google"></i> Google Auth</span><span class="stat-row-val" id="googleAuth">—</span></div>
+        <div style="margin-top:20px;">
+          <button class="save-btn" style="background:var(--surface);color:var(--text);border:1px solid var(--border2);" onclick="sendVerificationEmail()">
+            <i class="fa-solid fa-envelope"></i> Send Verification Email
+          </button>
+        </div>
+        <div class="danger-zone">
+          <h4><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h4>
+          <p>Deleting your account is permanent. All your earnings and data will be lost.</p>
+          <button class="save-btn" style="background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.3);" onclick="confirmDeleteAccount()">
+            <i class="fa-solid fa-trash"></i> Delete Account
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="toast"></div>
+
+<script >
+  const cfg = { apiKey:"AIzaSyBnPxRn13A1bEo901P8O3VE5X_nKvclFpI", authDomain:"liuspros.firebaseapp.com", projectId:"liuspros", storageBucket:"liuspros.firebasestorage.app", messagingSenderId:"1072846880138", appId:"1:1072846880138:web:d095b5196563844e9edc73" };
+  
+  var auth = firebase.auth();
+  var db = firebase.firestore();
+
+  firebase.auth().onAuthStateChanged( async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    const u    = snap.data();
+
+    // Hero
+    document.getElementById('profileName').textContent  = u.name || user.displayName || 'User';
+    document.getElementById('profileEmail').textContent = user.email;
+    if (u.photo) { document.getElementById('profileAvatar').innerHTML = `<img src="${u.photo}" alt="avatar"/>`; }
+    if (u.premium) {
+      document.getElementById('premiumCrown').style.display = 'flex';
+      document.getElementById('planBadge').innerHTML = '<i class="fa-solid fa-crown"></i> Premium';
+      document.getElementById('planBadge').className = 'badge badge-gold';
+    }
+    const joined = u.joinedAt?.toDate?.()?.toLocaleDateString('en-NG',{month:'short',year:'numeric'}) || '—';
+    document.getElementById('joinedBadge').textContent = `Joined ${joined}`;
+
+    // Form fields
+    document.getElementById('editName').value          = u.name || '';
+    document.getElementById('editPhone').value         = u.phone || '';
+    document.getElementById('editEmail').value         = user.email || '';
+    document.getElementById('editBank').value          = u.bankName || '';
+    document.getElementById('editAccountNumber').value = u.accountNumber || '';
+    document.getElementById('editAccountName').value   = u.accountName || '';
+
+    // Stats
+    document.getElementById('statTotalEarned').textContent = '₦' + ((u.totalEarned || 0)).toLocaleString();
+    document.getElementById('statReferrals').textContent   = u.referrals || 0;
+    document.getElementById('statTasks').textContent       = (u.tasksCompleted || []).length;
+    document.getElementById('statDownloads').textContent   = u.downloads || 0;
+    document.getElementById('statPlan').textContent        = u.premium ? '⭐ Premium' : 'Free';
+    document.getElementById('statJoined').textContent      = joined;
+
+    // Security
+    document.getElementById('emailVerified').textContent = user.emailVerified ? '✅ Verified' : '❌ Not verified';
+    document.getElementById('googleAuth').textContent    = user.providerData.some(p => p.providerId === 'google.com') ? '✅ Connected' : '❌ Not connected';
+
+    // Save profile
+    window.saveProfile = async function() {
+      const name  = document.getElementById('editName').value.trim();
+      const phone = document.getElementById('editPhone').value.trim();
+      if (!name) { showToast('Name cannot be empty', 'error'); return; }
+      try {
+        await updateDoc(doc(db,'users',user.uid), { name, phone });
+        showToast('Profile saved! ✅', 'success');
+        document.getElementById('profileName').textContent = name;
+      } catch(e) { showToast('Error saving: ' + e.message, 'error'); }
+    };
+
+    // Save bank details
+    window.saveBankDetails = async function() {
+      const bankName      = document.getElementById('editBank').value;
+      const accountNumber = document.getElementById('editAccountNumber').value.trim();
+      const accountName   = document.getElementById('editAccountName').value.trim();
+      if (!bankName || !accountNumber || !accountName) { showToast('Please fill all bank fields', 'error'); return; }
+      if (accountNumber.length !== 10) { showToast('Account number must be 10 digits', 'error'); return; }
+      try {
+        await updateDoc(doc(db,'users',user.uid), { bankName, accountNumber, accountName });
+        showToast('Bank details saved! ✅', 'success');
+      } catch(e) { showToast('Error: ' + e.message, 'error'); }
+    };
+
+    // Send verification email
+    window.sendVerificationEmail = async function() {
+      if (user.emailVerified) { showToast('Email already verified ✅', 'info'); return; }
+      try {
+        await sendEmailVerification(user);
+        showToast('Verification email sent! Check your inbox.', 'success');
+      } catch(e) { showToast('Error: ' + e.message, 'error'); }
+    };
+
+    // Delete account
+    window.confirmDeleteAccount = async function() {
+      if (!confirm('Are you absolutely sure? All data and earnings will be lost permanently.')) return;
+      if (!confirm('Last warning — this CANNOT be undone. Delete account?')) return;
+      try {
+        await deleteUser(user);
+        showToast('Account deleted', 'info');
+        window.location.href = 'index.html';
+      } catch(e) { showToast('Please sign out and sign back in before deleting', 'error'); }
+    };
+  });
+</script>
+</body>
+</html>

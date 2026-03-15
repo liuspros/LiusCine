@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Referrals — LiusCine</title>
+<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  body{padding-top:0;}
+  .dash-layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+  .ref-main{padding:32px 36px;background:var(--bg);}
+  .ref-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+  .ref-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;}
+  .ref-stat-val{font-size:28px;font-weight:900;letter-spacing:-1px;margin-bottom:4px;}
+  .ref-stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;}
+  .ref-link-card{background:linear-gradient(135deg,#150028,var(--card));border:1px solid var(--accent);border-radius:16px;padding:24px;margin-bottom:24px;}
+  .ref-link-card h3{font-size:14px;font-weight:700;margin-bottom:6px;}
+  .ref-link-card p{font-size:12px;color:var(--muted);margin-bottom:16px;font-weight:400;}
+  .ref-link-row{display:flex;background:var(--surface);border:1px solid var(--border2);border-radius:10px;overflow:hidden;margin-bottom:12px;}
+  .ref-link-text{flex:1;padding:12px 16px;font-size:13px;color:var(--accent);font-weight:600;word-break:break-all;}
+  .share-row{display:flex;gap:8px;}
+  .share-pill{flex:1;padding:10px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .share-pill:hover{border-color:var(--accent);color:var(--accent);}
+  .ref-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+  .ref-table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  .ref-table-header h3{font-size:14px;font-weight:700;}
+  .empty-refs{text-align:center;padding:48px 20px;color:var(--muted);}
+  .empty-refs i{font-size:40px;display:block;margin-bottom:12px;opacity:0.3;}
+  .ref-row{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid rgba(45,0,82,0.3);transition:background 0.2s;}
+  .ref-row:hover{background:rgba(108,0,255,0.04);}
+  .ref-row:last-child{border-bottom:none;}
+  .ref-avatar{width:36px;height:36px;background:var(--purple-deep);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:14px;flex-shrink:0;}
+  .ref-info{flex:1;}
+  .ref-name{font-size:13px;font-weight:700;}
+  .ref-date{font-size:11px;color:var(--muted);}
+  .ref-status{font-size:11px;font-weight:700;padding:4px 10px;border-radius:100px;}
+  .ref-earned{font-size:14px;font-weight:800;color:var(--green);}
+  @media(max-width:900px){.dash-layout{grid-template-columns:1fr;}.sidebar{display:none;}.ref-main{padding:20px 16px;}.ref-stats{grid-template-columns:1fr 1fr;}}
+  @media(max-width:480px){.ref-stats{grid-template-columns:1fr 1fr;}.share-row{flex-wrap:wrap;}}
+</style>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script>
+if (!firebase.apps.length) {
+  firebase.initializeApp({apiKey:"AIzaSyBnPxRn13A1bEo901P8O3VE5X_nKvclFpI",authDomain:"liuspros.firebaseapp.com",projectId:"liuspros",storageBucket:"liuspros.firebasestorage.app",messagingSenderId:"1072846880138",appId:"1:1072846880138:web:d095b5196563844e9edc73"});
+}
+function showToast(msg,type){var t=document.querySelector('.toast');if(!t)return;var icons={success:'✅',error:'❌',info:'ℹ️'};t.textContent=(icons[type]||'')+' '+msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},3500);}
+function handleSignOut(){firebase.auth().signOut().then(function(){window.location.href='index.html';});}
+</script>
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">Lius<span>Cine</span></a>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-house"></i></span> Dashboard</a>
+      <a href="movies.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-clapperboard"></i></span> Browse Movies</a>
+      <a href="watchlist.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-bookmark"></i></span> My Watchlist</a>
+      <a href="referrals.html" class="sidebar-item active"><span class="sidebar-icon"><i class="fa-solid fa-users"></i></span> My Referrals</a>
+      <a href="withdrawals.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-clock-rotate-left"></i></span> Withdrawal History</a>
+      <a href="profile.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-user"></i></span> My Profile</a>
+      <a href="leaderboard.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-trophy"></i></span> Leaderboard</a>
+      <a href="#" class="sidebar-item" onclick="handleSignOut()"><span class="sidebar-icon"><i class="fa-solid fa-right-from-bracket"></i></span> Sign Out</a>
+    </nav>
+  </aside>
+
+  <main class="ref-main">
+    <div style="margin-bottom:24px;">
+      <h1 style="font-size:24px;font-weight:900;letter-spacing:-0.5px;margin-bottom:4px;"><i class="fa-solid fa-users" style="color:var(--accent)"></i> My Referrals</h1>
+      <p style="font-size:13px;color:var(--muted);">Track everyone who registered & paid premium using your link</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="ref-stats">
+      <div class="ref-stat"><div class="ref-stat-val" id="statTotal" style="color:var(--accent)">0</div><div class="ref-stat-lbl">Total Referrals</div></div>
+      <div class="ref-stat"><div class="ref-stat-val" id="statPremium" style="color:var(--gold)">0</div><div class="ref-stat-lbl">Went Premium</div></div>
+      <div class="ref-stat"><div class="ref-stat-val" id="statEarned" style="color:var(--green)">₦0</div><div class="ref-stat-lbl">Total Earned</div></div>
+      <div class="ref-stat"><div class="ref-stat-val" id="statPending" style="color:var(--muted)">0</div><div class="ref-stat-lbl">Free (Pending)</div></div>
+    </div>
+
+    <!-- Referral Link Card -->
+    <div class="ref-link-card" id="refLinkCard">
+      <h3><i class="fa-solid fa-link"></i> Your Referral Link</h3>
+      <p>Share this link. When someone clicks it, registers, and pays Premium — you earn ₦500.</p>
+      <div class="ref-link-row">
+        <div class="ref-link-text" id="refLinkDisplay">Loading...</div>
+        <button class="ref-copy-btn" id="refCopyBtn" style="padding:0 16px;background:var(--purple-mid);border:none;color:#fff;font-family:'Lexend',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">
+          <i class="fa-solid fa-copy"></i> Copy
+        </button>
+      </div>
+      <div class="share-row">
+        <button class="share-pill" id="shareWA"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+        <button class="share-pill" id="shareIG"><i class="fa-brands fa-instagram"></i> Instagram</button>
+        <button class="share-pill" id="shareTT"><i class="fa-brands fa-tiktok"></i> TikTok</button>
+        <button class="share-pill" id="shareSMS"><i class="fa-solid fa-message"></i> SMS</button>
+      </div>
+    </div>
+
+    <!-- Premium-only lock -->
+    <div id="premiumLockMsg" style="display:none;background:rgba(108,0,255,0.08);border:1px solid rgba(108,0,255,0.2);border-radius:14px;padding:24px;text-align:center;margin-bottom:24px;">
+      <i class="fa-solid fa-lock" style="font-size:32px;color:var(--accent);margin-bottom:12px;display:block;"></i>
+      <h3 style="font-size:16px;font-weight:800;margin-bottom:8px;">Premium Members Only</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Upgrade to Premium to unlock your referral link and earn ₦500 per referral.</p>
+      <button class="btn btn-primary" onclick="handleUpgrade()"><i class="fa-solid fa-crown"></i> Upgrade — ₦1,000</button>
+    </div>
+
+    <!-- Referral history table -->
+    <div class="ref-table-wrap">
+      <div class="ref-table-header">
+        <h3><i class="fa-solid fa-clock-rotate-left" style="color:var(--accent)"></i> Referral History</h3>
+        <span class="badge badge-purple" id="refCount">0 referrals</span>
+      </div>
+      <div id="refList">
+        <div class="empty-refs">
+          <i class="fa-solid fa-users"></i>
+          <p>No referrals yet. Share your link to start earning!</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="toast"></div>
+
+<script >
+  const cfg  = { apiKey:"AIzaSyBnPxRn13A1bEo901P8O3VE5X_nKvclFpI", authDomain:"liuspros.firebaseapp.com", projectId:"liuspros", storageBucket:"liuspros.firebasestorage.app", messagingSenderId:"1072846880138", appId:"1:1072846880138:web:d095b5196563844e9edc73" };
+  
+  var auth = firebase.auth();
+  var db = firebase.firestore();
+
+  firebase.auth().onAuthStateChanged( async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+
+    const uSnap   = await getDoc(doc(db,'users',user.uid));
+    const uData   = uSnap.data();
+    const premium = uData?.premium || false;
+
+    if (!premium) {
+      document.getElementById('refLinkCard').style.display = 'none';
+      document.getElementById('premiumLockMsg').style.display = 'block';
+    } else {
+      // Set up referral link
+      const refLink = `https://${window.location.host}/login.html?ref=${user.uid}`;
+      document.getElementById('refLinkDisplay').textContent = refLink;
+      document.getElementById('refCopyBtn').onclick = () => {
+        navigator.clipboard.writeText(refLink);
+        showToast('Referral link copied! 🔗', 'success');
+      };
+      const shareText = `🎬 Watch free Nollywood movies & earn real money on LiusCine!\n\n✅ 500+ free movies\n💰 Earn ₦500 per referral\n📥 HD downloads\n\nJoin now 👇\n${refLink}`;
+      document.getElementById('shareWA').onclick  = () => window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+      document.getElementById('shareIG').onclick  = () => { navigator.clipboard.writeText(refLink); showToast('Link copied! Paste in your Instagram bio 📸', 'success'); };
+      document.getElementById('shareTT').onclick  = () => { navigator.clipboard.writeText(refLink); showToast('Link copied! Paste in your TikTok bio 🎵', 'success'); };
+      document.getElementById('shareSMS').onclick = () => window.open(`sms:?body=${encodeURIComponent(shareText)}`, '_blank');
+    }
+
+    // Load referral transactions
+    const q    = query(collection(db,'transactions'), where('userId','==',user.uid), where('type','==','referral'), orderBy('createdAt','desc'));
+    const snap = await getDocs(q);
+
+    const totalEarned  = snap.docs.reduce((s,d) => s + (d.data().amount||0), 0);
+    const totalRefs    = uData?.referrals || snap.size;
+
+    // Count how many referred users went premium
+    let premiumRefs = 0;
+    for (const d of snap.docs) {
+      const refUid = d.data().referredUid;
+      if (refUid) {
+        const rSnap = await getDoc(doc(db,'users',refUid));
+        if (rSnap.data()?.premium) premiumRefs++;
+      }
+    }
+
+    document.getElementById('statTotal').textContent   = totalRefs;
+    document.getElementById('statPremium').textContent = premiumRefs;
+    document.getElementById('statEarned').textContent  = '₦' + totalEarned.toLocaleString();
+    document.getElementById('statPending').textContent = Math.max(totalRefs - premiumRefs, 0);
+    document.getElementById('refCount').textContent    = `${snap.size} referrals`;
+
+    if (!snap.empty) {
+      document.getElementById('refList').innerHTML = snap.docs.map(d => {
+        const t    = d.data();
+        const date = t.createdAt?.toDate?.()?.toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}) || '—';
+        return `<div class="ref-row">
+          <div class="ref-avatar"><i class="fa-solid fa-user"></i></div>
+          <div class="ref-info">
+            <div class="ref-name">${t.description?.replace('Referral Bonus — ','') || 'User'}</div>
+            <div class="ref-date">${date}</div>
+          </div>
+          <span class="badge badge-gold" style="font-size:10px;"><i class="fa-solid fa-crown"></i> Premium</span>
+          <span class="ref-earned">+₦${(t.amount||0).toLocaleString()}</span>
+        </div>`;
+      }).join('');
+    }
+  });
+</script>
+</body>
+</html>
