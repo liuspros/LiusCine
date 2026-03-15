@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Watchlist — LiusCine</title>
+<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  body{padding-top:0;}
+  .dash-layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+  .watchlist-main{padding:32px 36px;background:var(--bg);}
+  .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px;}
+  .page-header h1{font-size:24px;font-weight:900;letter-spacing:-0.5px;}
+  .page-header p{font-size:13px;color:var(--muted);margin-top:2px;}
+  .empty-state{text-align:center;padding:80px 20px;}
+  .empty-state i{font-size:64px;color:var(--border2);margin-bottom:16px;display:block;}
+  .empty-state h3{font-size:18px;font-weight:800;margin-bottom:8px;}
+  .empty-state p{font-size:14px;color:var(--muted);font-weight:400;margin-bottom:24px;}
+  .watchlist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:20px;}
+  .wl-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative;cursor:pointer;transition:all 0.3s;}
+  .wl-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 16px 40px rgba(108,0,255,0.15);}
+  .wl-poster{aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;}
+  .wl-remove{position:absolute;top:8px;right:8px;width:28px;height:28px;background:rgba(239,68,68,0.85);border:none;border-radius:6px;color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;}
+  .wl-card:hover .wl-remove{opacity:1;}
+  .wl-info{padding:12px;}
+  .wl-title{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
+  .wl-meta{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;}
+  @media(max-width:900px){.dash-layout{grid-template-columns:1fr;}.sidebar{display:none;}.watchlist-main{padding:20px 16px;}}
+</style>
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">Lius<span>Cine</span></a>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-house"></i></span> Dashboard</a>
+      <a href="movies.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-clapperboard"></i></span> Browse Movies</a>
+      <a href="watchlist.html" class="sidebar-item active"><span class="sidebar-icon"><i class="fa-solid fa-bookmark"></i></span> My Watchlist</a>
+      <a href="referrals.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-users"></i></span> My Referrals</a>
+      <a href="withdrawals.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-clock-rotate-left"></i></span> Withdrawal History</a>
+      <a href="profile.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-user"></i></span> My Profile</a>
+      <a href="leaderboard.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-trophy"></i></span> Leaderboard</a>
+      <a href="#" class="sidebar-item" onclick="handleSignOut()"><span class="sidebar-icon"><i class="fa-solid fa-right-from-bracket"></i></span> Sign Out</a>
+    </nav>
+  </aside>
+
+  <main class="watchlist-main">
+    <div class="page-header">
+      <div>
+        <h1><i class="fa-solid fa-bookmark" style="color:var(--accent)"></i> My Watchlist</h1>
+        <p id="watchlistCount">Loading...</p>
+      </div>
+      <a href="movies.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Add Movies</a>
+    </div>
+
+    <div id="watchlistContent">
+      <div class="empty-state">
+        <i class="fa-solid fa-bookmark"></i>
+        <h3>Your watchlist is empty</h3>
+        <p>Save movies you want to watch later and they'll appear here.</p>
+        <a href="movies.html" class="btn btn-primary"><i class="fa-solid fa-clapperboard"></i> Browse Movies</a>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="toast"></div>
+<script type="module" src="app.js"></script>
+<script type="module">
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import { getFirestore, collection, query, where, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+  const cfg  = { apiKey:"AIzaSyBnPxRn13A1bEo901P8O3VE5X_nKvclFpI", authDomain:"liuspros.firebaseapp.com", projectId:"liuspros", storageBucket:"liuspros.firebasestorage.app", messagingSenderId:"1072846880138", appId:"1:1072846880138:web:d095b5196563844e9edc73" };
+  const fapp = getApps().length > 0 ? getApp() : initializeApp(cfg);
+  const auth = getAuth(fapp);
+  const db   = getFirestore(fapp);
+
+  const posters = ['poster-a','poster-b','poster-c','poster-d','poster-e','poster-f','poster-g','poster-h'];
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+
+    const q    = query(collection(db, 'watchlist'), where('userId','==',user.uid));
+    const snap = await getDocs(q);
+
+    document.getElementById('watchlistCount').textContent = `${snap.size} movie${snap.size !== 1 ? 's' : ''} saved`;
+
+    if (snap.empty) return;
+
+    const grid = document.createElement('div');
+    grid.className = 'watchlist-grid';
+
+    snap.docs.forEach((d, i) => {
+      const m   = d.data();
+      const cls = posters[i % posters.length];
+      grid.innerHTML += `
+        <div class="wl-card" onclick="window.location.href='movie.html?id=${m.movieId}'">
+          <div class="wl-poster ${cls}">
+            <i class="fa-solid fa-film" style="font-size:36px;color:rgba(139,92,246,0.3)"></i>
+            <button class="wl-remove" onclick="removeFromWatchlist(event,'${d.id}',this)">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="wl-info">
+            <div class="wl-title">${m.title || 'Unknown'}</div>
+            <div class="wl-meta">
+              <span>${m.year || '—'}</span>
+              <span style="color:var(--gold)"><i class="fa-solid fa-star" style="font-size:9px"></i> ${m.rating || '—'}</span>
+            </div>
+          </div>
+        </div>`;
+    });
+
+    document.getElementById('watchlistContent').innerHTML = '';
+    document.getElementById('watchlistContent').appendChild(grid);
+
+    window.removeFromWatchlist = async function(e, docId, btn) {
+      e.stopPropagation();
+      if (!confirm('Remove from watchlist?')) return;
+      await deleteDoc(doc(db, 'watchlist', docId));
+      btn.closest('.wl-card').remove();
+      showToast('Removed from watchlist', 'info');
+    };
+  });
+</script>
+</body>
+</html>

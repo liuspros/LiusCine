@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Panel — LiusCine</title>
+<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  body{padding-top:0;}
+  .admin-layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+  .admin-sidebar{background:#060010;border-right:1px solid var(--border);position:fixed;top:0;left:0;width:240px;height:100vh;display:flex;flex-direction:column;z-index:100;}
+  .admin-logo{padding:20px 20px 16px;border-bottom:1px solid var(--border);}
+  .admin-logo a{font-size:20px;font-weight:900;color:var(--text);text-decoration:none;}
+  .admin-logo a span{color:var(--accent);}
+  .admin-logo p{font-size:10px;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+  .admin-nav{flex:1;padding:12px;overflow-y:auto;}
+  .admin-nav-section{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:12px 10px 6px;}
+  .admin-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all 0.2s;text-decoration:none;margin-bottom:2px;}
+  .admin-item:hover{background:var(--card);color:var(--text);}
+  .admin-item.active{background:rgba(108,0,255,0.15);color:var(--accent);}
+  .admin-item-ico{font-size:14px;width:20px;text-align:center;}
+  .admin-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;}
+  .admin-main{margin-left:240px;padding:28px 32px;background:var(--bg);min-height:100vh;}
+  .admin-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+  .admin-topbar h1{font-size:22px;font-weight:900;letter-spacing:-0.5px;}
+  .admin-topbar p{font-size:12px;color:var(--muted);margin-top:2px;font-weight:400;}
+  .admin-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px;}
+  .admin-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;}
+  .admin-stat-icon{position:absolute;right:16px;top:16px;font-size:22px;opacity:0.15;color:var(--accent);}
+  .admin-stat-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+  .admin-stat-val{font-size:26px;font-weight:900;letter-spacing:-0.5px;}
+  .admin-stat-change{font-size:11px;color:var(--green);font-weight:600;margin-top:6px;}
+  .admin-tabs{display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:24px;width:fit-content;}
+  .admin-tab-btn{padding:8px 20px;border:none;border-radius:7px;background:transparent;color:var(--muted);font-family:'Lexend',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+  .admin-tab-btn.active{background:var(--purple-mid);color:#fff;box-shadow:0 4px 12px rgba(108,0,255,0.3);}
+  .add-movie-form{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:24px;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+  .select-input{width:100%;padding:13px 16px;background:var(--surface);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'Lexend',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;cursor:pointer;}
+  .select-input:focus{border-color:var(--accent);}
+  textarea.input-standalone{resize:vertical;min-height:100px;font-family:'Lexend',sans-serif;}
+  .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+  .status-active{background:var(--green);}
+  .status-pending{background:var(--gold);}
+  .status-banned{background:var(--red);}
+  .action-btns{display:flex;gap:6px;}
+  .action-btn{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Lexend',sans-serif;border:none;transition:all 0.2s;display:flex;align-items:center;gap:4px;}
+  .action-edit{background:rgba(139,92,246,0.15);color:var(--accent);}
+  .action-edit:hover{background:rgba(139,92,246,0.25);}
+  .action-del{background:rgba(239,68,68,0.1);color:var(--red);}
+  .action-del:hover{background:rgba(239,68,68,0.2);}
+  .action-approve{background:rgba(16,185,129,0.1);color:var(--green);}
+  .action-approve:hover{background:rgba(16,185,129,0.2);}
+  .withdraw-req{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:14px;margin-bottom:10px;transition:border-color 0.2s;}
+  .withdraw-req:hover{border-color:var(--border2);}
+  .wr-ico{width:44px;height:44px;background:var(--card2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:18px;flex-shrink:0;}
+  .wr-info{flex:1;}
+  .wr-name{font-size:14px;font-weight:700;margin-bottom:3px;}
+  .wr-details{font-size:12px;color:var(--muted);font-weight:400;}
+  .wr-amount{font-size:20px;font-weight:900;color:var(--accent);margin-right:12px;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+  @media(max-width:1200px){.admin-stats{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:900px){.admin-layout{grid-template-columns:1fr;}.admin-sidebar{display:none;}.admin-main{margin-left:0;padding:20px;}}
+
+  @media(max-width:1200px){
+    .admin-stats{grid-template-columns:repeat(3,1fr)!important;}
+    .form-row-3{grid-template-columns:1fr 1fr!important;}
+  }
+  @media(max-width:900px){
+    .admin-layout{grid-template-columns:1fr!important;}
+    .admin-sidebar{display:none!important;}
+    .admin-main{margin-left:0!important;padding:16px!important;}
+    .admin-stats{grid-template-columns:1fr 1fr!important;gap:10px!important;}
+    .admin-topbar{flex-direction:column;align-items:flex-start;gap:12px;}
+    .admin-topbar h1{font-size:20px!important;}
+    .table-wrap{overflow-x:auto;}
+    .table th,.table td{white-space:nowrap;}
+    .withdraw-req{flex-wrap:wrap;gap:10px;}
+    .wr-info{min-width:calc(100% - 60px);}
+    .wr-amount{margin-left:auto;}
+    .action-btns{width:100%;justify-content:flex-end;}
+    .form-row{grid-template-columns:1fr!important;}
+    .form-row-3{grid-template-columns:1fr!important;}
+  }
+  @media(max-width:768px){
+    .admin-main{padding:12px!important;}
+    .admin-stats{grid-template-columns:1fr 1fr!important;}
+    .admin-stat{padding:14px!important;}
+    .admin-stat-val{font-size:20px!important;}
+    .admin-tabs{width:100%;overflow-x:auto;}
+    .admin-tab-btn{padding:8px 14px;font-size:12px;white-space:nowrap;}
+    .add-movie-form{padding:16px!important;}
+    .withdraw-req{padding:12px!important;}
+  }
+  @media(max-width:480px){
+    .admin-main{padding:10px!important;}
+    .admin-stats{grid-template-columns:1fr 1fr!important;gap:8px!important;}
+    .admin-stat{padding:12px!important;}
+    .admin-stat-val{font-size:18px!important;}
+    .admin-stat-label{font-size:10px!important;}
+    .admin-topbar h1{font-size:18px!important;}
+    .table th,.table td{padding:8px 10px!important;font-size:11px!important;}
+    .action-btn{font-size:10px;padding:4px 8px;}
+    .add-movie-form{padding:12px!important;}
+  }
+  @media(max-width:360px){
+    .admin-stats{grid-template-columns:1fr!important;}
+    .admin-stat-val{font-size:22px!important;}
+  }
+
+
+  /* ── MOBILE NAV ── */
+  .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:6px; background:none; border:none; z-index:200; }
+  .hamburger span { width:22px; height:2px; background:var(--text); border-radius:2px; transition:all 0.3s; display:block; }
+  .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity:0; }
+  .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+  .mobile-menu {
+    display:none; position:fixed; top:60px; left:0; right:0;
+    background:var(--bg2); border-bottom:1px solid var(--border);
+    padding:16px; z-index:999; flex-direction:column; gap:4px;
+    animation:slideDown 0.25s ease;
+  }
+  @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+  .mobile-menu.open { display:flex; }
+  .mobile-menu a {
+    display:flex; align-items:center; gap:12px;
+    padding:12px 16px; border-radius:10px;
+    color:var(--text2); text-decoration:none; font-size:14px; font-weight:600;
+    transition:background 0.2s;
+  }
+  .mobile-menu a:hover { background:var(--card); color:var(--text); }
+  .mobile-menu a i { width:18px; text-align:center; color:var(--accent); }
+  .mobile-menu-actions { display:flex; gap:8px; margin-top:8px; padding-top:12px; border-top:1px solid var(--border); }
+  .mobile-menu-actions .btn { flex:1; justify-content:center; font-size:13px; }
+  @media(max-width:768px) {
+    .hamburger { display:flex; }
+    .nav-links { display:none!important; }
+    .nav-right { display:none!important; }
+  }
+
+</style>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div class="admin-logo">
+      <a href="index.html">Lius<span>Cine</span></a>
+      <p><i class="fa-solid fa-lock"></i> Admin Panel</p>
+    </div>
+    <nav class="admin-nav">
+      <div class="admin-nav-section">Overview</div>
+      <a class="admin-item active" onclick="showPanel('dashboard',this)"><span class="admin-item-ico"><i class="fa-solid fa-chart-pie"></i></span> Dashboard</a>
+      <a class="admin-item" onclick="showPanel('movies',this)"><span class="admin-item-ico"><i class="fa-solid fa-clapperboard"></i></span> Movies</a>
+      <div class="admin-nav-section">Users</div>
+      <a class="admin-item" onclick="showPanel('users',this)"><span class="admin-item-ico"><i class="fa-solid fa-users"></i></span> All Users</a>
+      <a class="admin-item" onclick="showPanel('withdrawals',this)"><span class="admin-item-ico"><i class="fa-solid fa-money-bill-transfer"></i></span> Withdrawals <span class="admin-badge">3</span></a>
+      <div class="admin-nav-section">Content</div>
+      <a class="admin-item" onclick="showPanel('add-movie',this)"><span class="admin-item-ico"><i class="fa-solid fa-plus"></i></span> Add Movie</a>
+      <a class="admin-item" onclick="showPanel('requests',this)"><span class="admin-item-ico"><i class="fa-solid fa-inbox"></i></span> Movie Requests <span class="admin-badge">8</span></a>
+      <a class="admin-item" onclick="showPanel('tasks',this)"><span class="admin-item-ico"><i class="fa-solid fa-list-check"></i></span> Manage Tasks</a>
+      <div class="admin-nav-section">System</div>
+      <a class="admin-item" onclick="showPanel('settings',this)"><span class="admin-item-ico"><i class="fa-solid fa-gear"></i></span> Site Settings</a>
+      <a href="index.html" class="admin-item"><span class="admin-item-ico"><i class="fa-solid fa-globe"></i></span> View Website</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="admin-topbar">
+        <div><h1><i class="fa-solid fa-chart-pie" style="color:var(--accent)"></i> Dashboard Overview</h1><p>Saturday, March 14, 2026 · All systems normal</p></div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-ghost btn-sm"><i class="fa-solid fa-file-export"></i> Export</button>
+          <button class="btn btn-primary btn-sm" onclick="showPanel('add-movie')"><i class="fa-solid fa-plus"></i> Add Movie</button>
+        </div>
+      </div>
+      <div class="admin-stats">
+        <div class="admin-stat"><div class="admin-stat-icon"><i class="fa-solid fa-users"></i></div><div class="admin-stat-label">Total Users</div><div class="admin-stat-val" style="color:var(--accent)">1,248</div><div class="admin-stat-change"><i class="fa-solid fa-arrow-up"></i> +24 today</div></div>
+        <div class="admin-stat"><div class="admin-stat-icon"><i class="fa-solid fa-film"></i></div><div class="admin-stat-label">Total Movies</div><div class="admin-stat-val" style="color:var(--purple-light)">512</div><div class="admin-stat-change"><i class="fa-solid fa-arrow-up"></i> +3 this week</div></div>
+        <div class="admin-stat"><div class="admin-stat-icon"><i class="fa-solid fa-crown"></i></div><div class="admin-stat-label">Premium Users</div><div class="admin-stat-val" style="color:var(--gold)">187</div><div class="admin-stat-change"><i class="fa-solid fa-arrow-up"></i> +12 this month</div></div>
+        <div class="admin-stat"><div class="admin-stat-icon"><i class="fa-solid fa-naira-sign"></i></div><div class="admin-stat-label">Revenue (₦)</div><div class="admin-stat-val" style="color:var(--green)">187k</div><div class="admin-stat-change"><i class="fa-solid fa-arrow-up"></i> +₦12,000 today</div></div>
+        <div class="admin-stat"><div class="admin-stat-icon"><i class="fa-solid fa-download"></i></div><div class="admin-stat-label">Downloads Today</div><div class="admin-stat-val">3,401</div><div class="admin-stat-change"><i class="fa-solid fa-arrow-up"></i> 18% vs yesterday</div></div>
+      </div>
+      <h3 style="font-size:15px;font-weight:800;margin-bottom:14px;"><i class="fa-solid fa-user-plus" style="color:var(--accent)"></i> Recent Registrations</h3>
+      <div class="table-wrap" style="margin-bottom:24px;">
+        <table class="table">
+          <thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Referrals</th><th>Balance</th><th>Joined</th><th>Action</th></tr></thead>
+          <tbody id="recentUsersBody"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted);"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
+        </table>
+      </div>
+
+      <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+        <div><div style="font-size:14px;font-weight:700;color:var(--red);margin-bottom:3px;"><i class="fa-solid fa-triangle-exclamation"></i> 3 Pending Withdrawal Requests</div><div style="font-size:12px;color:var(--muted);font-weight:400;">Total pending: ₦27,500</div></div>
+        <button class="btn btn-sm" style="background:var(--red);color:#fff;border:none;" onclick="showPanel('withdrawals')"><i class="fa-solid fa-arrow-right"></i> Review Now</button>
+      </div>
+    </div>
+
+    <!-- ADD MOVIE -->
+    <div class="panel" id="panel-add-movie">
+      <div class="admin-topbar"><div><h1><i class="fa-solid fa-plus" style="color:var(--accent)"></i> Add New Movie</h1><p>Upload movie details and download links</p></div><button class="btn btn-ghost btn-sm" onclick="showPanel('movies')"><i class="fa-solid fa-arrow-left"></i> Back to Movies</button></div>
+      <div class="add-movie-form">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:20px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;"><i class="fa-solid fa-circle-info"></i> Movie Information</h3>
+        <div class="form-row" style="margin-bottom:16px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-solid fa-film"></i> Movie Title *</label><input class="input-standalone" placeholder="e.g. King of Boys 3" class="input-standalone movie-title-input"/></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-regular fa-calendar"></i> Year *</label><input class="input-standalone" placeholder="2024" type="number" class="input-standalone movie-year-input"/></div>
+        </div>
+        <div class="form-row" style="margin-bottom:16px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-solid fa-tags"></i> Genre *</label><select class="select-input movie-genre-input"><option>Action</option><option>Romance</option><option>Comedy</option><option>Drama</option><option>Thriller</option><option>Yoruba</option><option>Series</option></select></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-solid fa-language"></i> Language</label><select class="select-input movie-lang-input"><option>English</option><option>Yoruba</option><option>Igbo</option><option>Hausa</option><option>Pidgin</option></select></div>
+        </div>
+        <div class="form-row" style="margin-bottom:16px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-solid fa-video"></i> Director</label><input class="input-standalone" placeholder="Director name" class="input-standalone movie-director-input"/></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-regular fa-clock"></i> Duration</label><input class="input-standalone" placeholder="e.g. 2h 15m" class="input-standalone movie-duration-input"/></div>
+        </div>
+        <div class="form-group"><label class="form-label"><i class="fa-solid fa-align-left"></i> Synopsis</label><textarea class="input-standalone" placeholder="Write a short description of the movie..." class="input-standalone movie-synopsis-input"></textarea></div>
+        <div class="divider"></div>
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:20px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;"><i class="fa-solid fa-lock"></i> Access & Visibility</h3>
+        <div class="form-row" style="margin-bottom:16px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-solid fa-unlock"></i> Access Level</label><select class="select-input movie-access-input"><option value="free">Free — Available to all</option><option value="premium">Premium — Members only</option></select></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label"><i class="fa-solid fa-star"></i> Rating (out of 10)</label><input class="input-standalone" placeholder="e.g. 8.2" type="number" step="0.1" class="input-standalone movie-rating-input"/></div>
+        </div>
+        <div class="divider"></div>
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:20px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;"><i class="fa-brands fa-telegram"></i> Download Links (Telegram)</h3>
+        <div class="form-row-3" style="margin-bottom:16px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label">360p Link (Free)</label><input class="input-standalone" placeholder="https://t.me/..."/></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label">480p Link (Free)</label><input class="input-standalone" placeholder="https://t.me/..."/></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label">720p HD Link (Premium)</label><input class="input-standalone" placeholder="https://t.me/..."/></div>
+        </div>
+        <div class="form-group"><label class="form-label"><i class="fa-brands fa-youtube"></i> YouTube Embed Link (for streaming)</label><input class="input-standalone" placeholder="https://www.youtube.com/embed/..." class="input-standalone movie-youtube-input"/></div>
+        <div style="display:flex;gap:12px;margin-top:24px;">
+          <button class="btn btn-primary btn-lg" onclick="addMovieToDb()" class="add-movie-btn btn btn-primary btn-lg"><i class="fa-solid fa-plus"></i> Add Movie</button>
+          <button class="btn btn-ghost btn-lg" onclick="showPanel('movies')"><i class="fa-solid fa-xmark"></i> Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOVIES -->
+    <div class="panel" id="panel-movies">
+      <div class="admin-topbar"><div><h1><i class="fa-solid fa-clapperboard" style="color:var(--accent)"></i> All Movies</h1><p id="movieCount">Loading from database...</p></div><button class="btn btn-primary btn-sm" onclick="showPanel('add-movie',this)"><i class="fa-solid fa-plus"></i> Add Movie</button></div>
+      <div style="display:flex;gap:12px;margin-bottom:20px;">
+        <div class="input-wrap" style="flex:1;"><input class="input" id="movieSearch" placeholder="Search movies..." oninput="filterMovies()"/></div>
+        <select class="select-input" style="width:160px;" id="movieGenreFilter" onchange="filterMovies()"><option value="">All Genres</option><option>Action</option><option>Romance</option><option>Comedy</option><option>Drama</option><option>Thriller</option><option>Yoruba</option><option>Series</option></select>
+      </div>
+      <div class="table-wrap" id="moviesTableWrap">
+        <div style="text-align:center;padding:48px;color:var(--muted);"><i class="fa-solid fa-spinner fa-spin" style="font-size:24px;display:block;margin-bottom:12px;"></i>Loading movies...</div>
+      </div>
+    </div>
+
+    <!-- WITHDRAWALS -->
+    <div class="panel" id="panel-withdrawals">
+      <div class="admin-topbar"><div><h1><i class="fa-solid fa-money-bill-transfer" style="color:var(--accent)"></i> Withdrawal Requests</h1><p id="wdSubtitle">Loading...</p></div></div>
+      <div id="withdrawalsList">
+        <div style="text-align:center;padding:48px;color:var(--muted);"><i class="fa-solid fa-spinner fa-spin" style="font-size:24px;display:block;margin-bottom:12px;"></i>Loading requests...</div>
+      </div>
+    </div>
+
+    <!-- REQUESTS -->
+    <div class="panel" id="panel-requests">
+      <div class="admin-topbar"><div><h1><i class="fa-solid fa-inbox" style="color:var(--accent)"></i> Movie Requests</h1><p id="reqSubtitle">Loading...</p></div></div>
+      <div class="table-wrap" id="requestsTable">
+        <div style="text-align:center;padding:48px;color:var(--muted);"><i class="fa-solid fa-spinner fa-spin" style="font-size:24px;display:block;margin-bottom:12px;"></i>Loading requests...</div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="panel" id="panel-users">
+      <div class="admin-topbar"><div><h1><i class="fa-solid fa-users" style="color:var(--accent)"></i> All Users</h1><p id="usersSubtitle">Loading...</p></div></div>
+      <div style="display:flex;gap:12px;margin-bottom:20px;">
+        <div class="input-wrap" style="flex:1;"><input class="input" id="userSearch" placeholder="Search by name or email..." oninput="filterUsers()"/></div>
+        <select class="select-input" style="width:160px;" id="userPlanFilter" onchange="filterUsers()"><option value="">All Plans</option><option value="premium">Premium</option><option value="free">Free</option></select>
+      </div>
+      <div class="table-wrap" id="usersTable">
+        <div style="text-align:center;padding:48px;color:var(--muted);"><i class="fa-solid fa-spinner fa-spin" style="font-size:24px;display:block;margin-bottom:12px;"></i>Loading users...</div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="panel" id="panel-settings">
+      <div class="admin-topbar"><div><h1><i class="fa-solid fa-gear" style="color:var(--accent)"></i> Site Settings</h1><p>Manage LiusCine configuration</p></div></div>
+      <div class="add-movie-form">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:20px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;"><i class="fa-solid fa-coins"></i> Earnings Configuration</h3>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label"><i class="fa-solid fa-user-plus"></i> Referral Bonus (₦)</label><input class="input-standalone" value="500" type="number"/></div>
+          <div class="form-group"><label class="form-label"><i class="fa-solid fa-list-check"></i> Task Reward (₦)</label><input class="input-standalone" value="100" type="number"/></div>
+          <div class="form-group"><label class="form-label"><i class="fa-solid fa-calendar-check"></i> Daily Check-in (₦)</label><input class="input-standalone" value="50" type="number"/></div>
+          <div class="form-group"><label class="form-label"><i class="fa-solid fa-money-bill-transfer"></i> Minimum Withdrawal (₦)</label><input class="input-standalone" value="5000" type="number"/></div>
+        </div>
+        <div class="divider"></div>
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:20px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;"><i class="fa-solid fa-crown"></i> Subscription</h3>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label"><i class="fa-solid fa-naira-sign"></i> Premium Price (₦/month)</label><input class="input-standalone" value="1000" type="number"/></div>
+          <div class="form-group"><label class="form-label"><i class="fa-solid fa-globe"></i> Site Name</label><input class="input-standalone" value="LiusCine"/></div>
+        </div>
+        <div class="form-group"><label class="form-label"><i class="fa-brands fa-whatsapp"></i> Admin WhatsApp</label><input class="input-standalone" value="+2349161976673"/></div>
+        <button class="btn btn-primary btn-lg" onclick="showToast('Settings saved!','success')"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button>
+      </div>
+    </div>
+
+    <!-- TASKS -->
+    <div class="panel" id="panel-tasks">
+      <div class="admin-topbar"><div><h1><i class="fa-solid fa-list-check" style="color:var(--accent)"></i> Manage Tasks</h1><p>Control daily earning tasks</p></div></div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Task</th><th>Reward</th><th>Completions</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:700"><i class="fa-solid fa-calendar-check" style="color:var(--accent)"></i> Daily Check-in</td><td style="color:var(--green)">₦50</td><td id="checkinCount">—</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn action-edit" onclick="showToast('Task settings coming soon','info')"><i class="fa-solid fa-pen"></i> Edit</button></td></tr>
+            <tr><td style="font-weight:700"><i class="fa-brands fa-instagram" style="color:var(--accent)"></i> Follow Instagram</td><td style="color:var(--green)">₦100</td><td id="igCount">—</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn action-edit" onclick="showToast('Task settings coming soon','info')"><i class="fa-solid fa-pen"></i> Edit</button></td></tr>
+            <tr><td style="font-weight:700"><i class="fa-brands fa-whatsapp" style="color:var(--accent)"></i> WhatsApp Status</td><td style="color:var(--green)">₦100</td><td id="waCount">—</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn action-edit" onclick="showToast('Task settings coming soon','info')"><i class="fa-solid fa-pen"></i> Edit</button></td></tr>
+            <tr><td style="font-weight:700"><i class="fa-brands fa-tiktok" style="color:var(--accent)"></i> Follow TikTok</td><td style="color:var(--green)">₦100</td><td id="ttCount">—</td><td><span class="badge badge-green">Active</span></td><td><button class="action-btn action-edit" onclick="showToast('Task settings coming soon','info')"><i class="fa-solid fa-pen"></i> Edit</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    </main>
+</div>
+
+<div class="toast"></div>
+<script type="module">
+  // ── ADMIN AUTH GUARD ──────────────────────
+  // Use getApps() to avoid double-init conflict with app.js
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBnPxRn13A1bEo901P8O3VE5X_nKvclFpI",
+    authDomain: "liuspros.firebaseapp.com",
+    projectId: "liuspros",
+    storageBucket: "liuspros.firebasestorage.app",
+    messagingSenderId: "1072846880138",
+    appId: "1:1072846880138:web:d095b5196563844e9edc73"
+  };
+
+  const ADMIN_EMAIL = "liuscreatives@gmail.com";
+
+  // Only initialise once — reuse existing app if already created
+  const firebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  const auth = getAuth(firebaseApp);
+  const db   = getFirestore(firebaseApp);
+
+  // Hide page while checking — prevents flash of content for non-admins
+  document.body.style.opacity = '0';
+  document.body.style.transition = 'opacity 0.3s';
+
+  // Give Firebase 5 seconds max to resolve auth state
+  let authResolved = false;
+  const authTimeout = setTimeout(() => {
+    if (!authResolved) window.location.replace("admin-login.html");
+  }, 5000);
+
+  onAuthStateChanged(auth, (user) => {
+    authResolved = true;
+    clearTimeout(authTimeout);
+
+    if (!user || user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+      window.location.replace("admin-login.html");
+      return;
+    }
+
+    // ✅ Admin confirmed — reveal page
+    document.body.style.opacity = '1';
+    loadAdminStats();
+  });
+
+  // ── LOAD ALL REAL DATA FROM FIRESTORE ──
+  let allMovies = [];
+  let allUsers  = [];
+
+  async function loadAdminStats() {
+    try {
+      // ── USERS ──
+      const usersSnap    = await getDocs(collection(db, "users"));
+      allUsers           = usersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const premiumCount = allUsers.filter(u => u.premium).length;
+
+      // ── MOVIES ──
+      const moviesSnap = await getDocs(query(collection(db,"movies"), orderBy("createdAt","desc")));
+      allMovies        = moviesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      // ── WITHDRAWALS ──
+      const wSnap      = await getDocs(query(collection(db,"withdrawals"), where("status","==","pending")));
+      const pendingAmt = wSnap.docs.reduce((s,d) => s + (d.data().amount||0), 0);
+
+      // ── REVENUE ──
+      const txSnap  = await getDocs(query(collection(db,"transactions"), where("type","==","premium")));
+      const revenue = txSnap.docs.reduce((s,d) => s + (d.data().amount||0), 0);
+
+      // ── TASK COMPLETIONS ──
+      const taskCounts = { instagram:0, 'whatsapp-status':0, 'tiktok-share':0, checkin:0 };
+      const taskTxns   = await getDocs(query(collection(db,"transactions"), where("type","==","task")));
+      taskTxns.docs.forEach(d => {
+        const desc = d.data().description || '';
+        if (desc.includes('Instagram'))   taskCounts.instagram++;
+        if (desc.includes('WhatsApp'))    taskCounts['whatsapp-status']++;
+        if (desc.includes('TikTok'))      taskCounts['tiktok-share']++;
+      });
+      const checkinTxns = await getDocs(query(collection(db,"transactions"), where("type","==","checkin")));
+      taskCounts.checkin = checkinTxns.size;
+
+      // ── UPDATE STAT CARDS ──
+      const stats = document.querySelectorAll('.admin-stat-val');
+      if (stats[0]) stats[0].textContent = allUsers.length.toLocaleString();
+      if (stats[1]) stats[1].textContent = allMovies.length.toLocaleString();
+      if (stats[2]) stats[2].textContent = premiumCount.toLocaleString();
+      if (stats[3]) stats[3].textContent = '₦' + revenue.toLocaleString();
+      if (stats[4]) stats[4].textContent = wSnap.size;
+
+      // Update subtitles
+      const badge = document.querySelector('.admin-badge');
+      if (badge) badge.textContent = wSnap.size;
+      const wdSub = document.getElementById('wdSubtitle');
+      if (wdSub) wdSub.textContent = `${wSnap.size} pending · Total: ₦${pendingAmt.toLocaleString()}`;
+      const movieCount = document.getElementById('movieCount');
+      if (movieCount) movieCount.textContent = `${allMovies.length} movies in database`;
+      const usersSub = document.getElementById('usersSubtitle');
+      if (usersSub) usersSub.textContent = `${allUsers.length} registered users · ${premiumCount} premium`;
+
+      // Task counts
+      if (document.getElementById('checkinCount')) document.getElementById('checkinCount').textContent = taskCounts.checkin.toLocaleString();
+      if (document.getElementById('igCount')) document.getElementById('igCount').textContent = taskCounts.instagram.toLocaleString();
+      if (document.getElementById('waCount')) document.getElementById('waCount').textContent = taskCounts['whatsapp-status'].toLocaleString();
+      if (document.getElementById('ttCount')) document.getElementById('ttCount').textContent = taskCounts['tiktok-share'].toLocaleString();
+
+      // Withdrawal alert
+      const alertEl = document.querySelector('.withdrawal-alert');
+      if (alertEl && wSnap.size > 0) {
+        alertEl.style.display = 'flex';
+        if (alertEl.querySelector('.alert-count')) alertEl.querySelector('.alert-count').textContent = wSnap.size;
+        if (alertEl.querySelector('.alert-amount')) alertEl.querySelector('.alert-amount').textContent = '₦' + pendingAmt.toLocaleString();
+      }
+
+      // ── LOAD TABLES ──
+      loadRecentUsers(allUsers.slice(0, 10));
+      loadMoviesTable(allMovies);
+      loadWithdrawals(wSnap);
+      await loadRequests();
+      loadUsersTable(allUsers);
+
+    } catch(e) { console.error("Admin load error:", e); showToast('Error loading data: ' + e.message, 'error'); }
+  }
+
+  // ── RECENT USERS TABLE ──
+  function loadRecentUsers(users) {
+    const tbody = document.getElementById('recentUsersBody');
+    if (!tbody) return;
+    if (users.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">No users yet</td></tr>'; return; }
+    tbody.innerHTML = users.map(u => {
+      const date = u.joinedAt?.toDate?.()?.toLocaleDateString('en-NG',{day:'numeric',month:'short'}) || '—';
+      return `<tr>
+        <td style="font-weight:700">${u.name||'—'}</td>
+        <td>${u.email||'—'}</td>
+        <td>${u.premium ? '<span class="badge badge-gold"><i class="fa-solid fa-crown"></i> Premium</span>' : '<span class="badge badge-purple">Free</span>'}</td>
+        <td style="color:var(--green)">${u.referrals||0}</td>
+        <td style="color:var(--accent)">₦${(u.balance||0).toLocaleString()}</td>
+        <td>${date}</td>
+        <td><button class="action-btn action-edit" onclick="showToast('${u.email}','info')"><i class="fa-solid fa-eye"></i></button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── MOVIES TABLE ──
+  function loadMoviesTable(movies) {
+    const wrap = document.getElementById('moviesTableWrap');
+    if (!wrap) return;
+    if (movies.length === 0) {
+      wrap.innerHTML = '<div style="text-align:center;padding:64px 20px;color:var(--muted);"><i class="fa-solid fa-film" style="font-size:48px;display:block;margin-bottom:16px;opacity:0.3"></i><h3 style="font-size:16px;font-weight:700;margin-bottom:8px;">No movies yet</h3><p>Click "Add Movie" to add your first movie.</p></div>';
+      return;
+    }
+    wrap.innerHTML = `<table class="table">
+      <thead><tr><th>Title</th><th>Genre</th><th>Year</th><th>Access</th><th>Downloads</th><th>Rating</th><th>Actions</th></tr></thead>
+      <tbody>${movies.map(m => `<tr data-id="${m.id}" data-title="${(m.title||'').toLowerCase()}" data-genre="${(m.genre||'').toLowerCase()}">
+        <td style="font-weight:700">${m.title||'—'}</td>
+        <td>${m.genre||'—'}</td>
+        <td>${m.year||'—'}</td>
+        <td>${m.access === 'premium' ? '<span class="badge badge-premium">PREMIUM</span>' : '<span class="badge badge-free">FREE</span>'}</td>
+        <td>${(m.downloads||0).toLocaleString()}</td>
+        <td style="color:var(--gold)"><i class="fa-solid fa-star"></i> ${m.rating||'—'}</td>
+        <td><div class="action-btns">
+          <button class="action-btn action-edit" onclick="editMovie('${m.id}')"><i class="fa-solid fa-pen"></i> Edit</button>
+          <button class="action-btn action-del" onclick="deleteMovie('${m.id}','${m.title}')"><i class="fa-solid fa-trash"></i></button>
+        </div></td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  }
+
+  // Filter movies
+  window.filterMovies = function() {
+    const search = document.getElementById('movieSearch')?.value?.toLowerCase() || '';
+    const genre  = document.getElementById('movieGenreFilter')?.value?.toLowerCase() || '';
+    const rows   = document.querySelectorAll('#moviesTableWrap tbody tr');
+    rows.forEach(row => {
+      const title    = row.dataset.title || '';
+      const rowGenre = row.dataset.genre || '';
+      const show     = (!search || title.includes(search)) && (!genre || rowGenre === genre);
+      row.style.display = show ? '' : 'none';
+    });
+  };
+
+  // Edit movie — pre-fill the add movie form
+  window.editMovie = function(movieId) {
+    const movie = allMovies.find(m => m.id === movieId);
+    if (!movie) return;
+    showPanel('add-movie');
+    setTimeout(() => {
+      const f = sel => document.querySelector(sel);
+      if (f('.movie-title-input'))    f('.movie-title-input').value    = movie.title || '';
+      if (f('.movie-year-input'))     f('.movie-year-input').value     = movie.year || '';
+      if (f('.movie-genre-input'))    f('.movie-genre-input').value    = movie.genre || '';
+      if (f('.movie-lang-input'))     f('.movie-lang-input').value     = movie.language || '';
+      if (f('.movie-director-input')) f('.movie-director-input').value = movie.director || '';
+      if (f('.movie-duration-input')) f('.movie-duration-input').value = movie.duration || '';
+      if (f('.movie-synopsis-input')) f('.movie-synopsis-input').value = movie.synopsis || '';
+      if (f('.movie-access-input'))   f('.movie-access-input').value   = movie.access || 'free';
+      if (f('.movie-rating-input'))   f('.movie-rating-input').value   = movie.rating || '';
+      if (f('.movie-link360-input'))  f('.movie-link360-input').value  = movie.link360 || '';
+      if (f('.movie-link480-input'))  f('.movie-link480-input').value  = movie.link480 || '';
+      if (f('.movie-link720-input'))  f('.movie-link720-input').value  = movie.link720 || '';
+      if (f('.movie-youtube-input'))  f('.movie-youtube-input').value  = movie.youtubeLink || '';
+      // Store editing ID
+      window._editingMovieId = movieId;
+      const addBtn = document.querySelector('.add-movie-btn');
+      if (addBtn) { addBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Changes'; addBtn.onclick = () => updateMovie(movieId); }
+    }, 100);
+  };
+
+  // Update existing movie
+  window.updateMovie = async function(movieId) {
+    const { updateDoc, doc: firestoreDoc } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js");
+    const g = sel => document.querySelector(sel)?.value?.trim();
+    try {
+      const btn = document.querySelector('.add-movie-btn');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...'; }
+      await updateDoc(firestoreDoc(db,"movies",movieId), {
+        title:g('.movie-title-input'), year:parseInt(g('.movie-year-input')),
+        genre:g('.movie-genre-input'), language:g('.movie-lang-input'),
+        director:g('.movie-director-input'), duration:g('.movie-duration-input'),
+        synopsis:g('.movie-synopsis-input'), access:g('.movie-access-input') || 'free',
+        rating:parseFloat(document.querySelector('.movie-rating-input')?.value) || 0,
+        link360:g('.movie-link360-input'), link480:g('.movie-link480-input'),
+        link720:g('.movie-link720-input'), youtubeLink:g('.movie-youtube-input')
+      });
+      showToast('Movie updated! ✅', 'success');
+      window._editingMovieId = null;
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-plus"></i> Add Movie'; btn.onclick = () => addMovieToDb(); }
+      // Reload movies
+      const snap = await getDocs(query(collection(db,"movies"), orderBy("createdAt","desc")));
+      allMovies  = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      loadMoviesTable(allMovies);
+    } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  };
+
+  // Delete movie
+  window.deleteMovie = async function(movieId, title) {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    const { deleteDoc, doc: firestoreDoc } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js");
+    try {
+      await deleteDoc(firestoreDoc(db,"movies",movieId));
+      allMovies = allMovies.filter(m => m.id !== movieId);
+      loadMoviesTable(allMovies);
+      document.getElementById('movieCount').textContent = `${allMovies.length} movies in database`;
+      showToast(`"${title}" deleted ✅`, 'success');
+    } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  };
+
+  // ── WITHDRAWALS TABLE ──
+  function loadWithdrawals(snap) {
+    const el = document.getElementById('withdrawalsList');
+    if (!el) return;
+    if (snap.empty) { el.innerHTML = '<div style="text-align:center;padding:48px;color:var(--muted)"><i class="fa-solid fa-check-circle" style="font-size:40px;display:block;margin-bottom:12px;color:var(--green);opacity:0.5"></i><p>No pending withdrawals</p></div>'; return; }
+    el.innerHTML = snap.docs.map(d => {
+      const w    = d.data();
+      const date = w.requestedAt?.toDate?.()?.toLocaleDateString('en-NG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) || '—';
+      return `<div class="withdraw-req" data-wid="${d.id}">
+        <div class="wr-ico"><i class="fa-solid fa-user"></i></div>
+        <div class="wr-info"><div class="wr-name">${w.userName||'—'}</div><div class="wr-details"><i class="fa-solid fa-building-columns"></i> ${w.bank||'—'} · ${w.accountNumber||'—'} · ${w.userEmail||'—'} · ${date}</div></div>
+        <span class="wr-amount">₦${(w.amount||0).toLocaleString()}</span>
+        <div class="action-btns">
+          <button class="action-btn action-approve" onclick="approveWithdrawal('${d.id}',this)"><i class="fa-solid fa-check"></i> Approve</button>
+          <button class="action-btn action-del" onclick="rejectWithdrawal('${d.id}',this)"><i class="fa-solid fa-xmark"></i> Reject</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── MOVIE REQUESTS ──
+  async function loadRequests() {
+    const el = document.getElementById('requestsTable');
+    if (!el) return;
+    const { orderBy: _ob } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js");
+    const snap = await getDocs(query(collection(db,"movieRequests"), where("status","==","pending")));
+    const reqSub = document.getElementById('reqSubtitle');
+    if (reqSub) reqSub.textContent = `${snap.size} pending requests`;
+    if (snap.empty) { el.innerHTML = '<div style="text-align:center;padding:48px;color:var(--muted)"><i class="fa-solid fa-inbox" style="font-size:40px;display:block;margin-bottom:12px;opacity:0.3"></i><p>No movie requests yet</p></div>'; return; }
+    el.innerHTML = `<table class="table"><thead><tr><th>Movie</th><th>Requested By</th><th>Date</th><th>Action</th></tr></thead><tbody>
+      ${snap.docs.map(d => {
+        const r    = d.data();
+        const date = r.requestedAt?.toDate?.()?.toLocaleDateString('en-NG',{day:'numeric',month:'short'}) || '—';
+        return `<tr><td style="font-weight:700">${r.title||'—'}</td><td>${r.userName||'—'}</td><td>${date}</td>
+          <td><div class="action-btns">
+            <button class="action-btn action-approve" onclick="approveRequest('${d.id}','${r.title}')"><i class="fa-solid fa-check"></i> Add to Library</button>
+            <button class="action-btn action-del" onclick="rejectRequest('${d.id}')"><i class="fa-solid fa-xmark"></i> Reject</button>
+          </div></td></tr>`;
+      }).join('')}
+    </tbody></table>`;
+  }
+
+  window.approveRequest = function(docId, title) {
+    showPanel('add-movie');
+    setTimeout(() => {
+      const t = document.querySelector('.movie-title-input');
+      if (t) t.value = title;
+    }, 100);
+    showToast(`Pre-filled "${title}" in Add Movie form`, 'info');
+  };
+  window.rejectRequest = async function(docId) {
+    const { updateDoc, doc: fd } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js");
+    await updateDoc(fd(db,"movieRequests",docId), { status:'rejected' });
+    showToast('Request rejected', 'info');
+    loadRequests();
+  };
+
+  // ── USERS TABLE ──
+  function loadUsersTable(users) {
+    const el = document.getElementById('usersTable');
+    if (!el) return;
+    if (users.length === 0) { el.innerHTML = '<div style="text-align:center;padding:48px;color:var(--muted)">No users yet</div>'; return; }
+    el.innerHTML = `<table class="table">
+      <thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Referrals</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="usersTableBody">${users.map(u => `<tr data-email="${(u.email||'').toLowerCase()}" data-plan="${u.premium?'premium':'free'}">
+        <td style="font-weight:700">${u.name||'—'}</td>
+        <td>${u.email||'—'}</td>
+        <td>${u.premium ? '<span class="badge badge-gold"><i class="fa-solid fa-crown"></i> Premium</span>' : '<span class="badge badge-purple">Free</span>'}</td>
+        <td style="color:var(--green)">${u.referrals||0}</td>
+        <td>₦${(u.balance||0).toLocaleString()}</td>
+        <td><span style="color:var(--green)"><i class="fa-solid fa-circle" style="font-size:8px"></i> Active</span></td>
+        <td><button class="action-btn action-edit" onclick="showToast('${u.email}','info')"><i class="fa-solid fa-eye"></i></button></td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  }
+
+  window.filterUsers = function() {
+    const search = document.getElementById('userSearch')?.value?.toLowerCase() || '';
+    const plan   = document.getElementById('userPlanFilter')?.value || '';
+    const rows   = document.querySelectorAll('#usersTable tbody tr');
+    rows.forEach(row => {
+      const email   = row.dataset.email || '';
+      const rowPlan = row.dataset.plan || '';
+      const show    = (!search || email.includes(search)) && (!plan || rowPlan === plan);
+      row.style.display = show ? '' : 'none';
+    });
+  };
+
+  window.adminSignOut = async function() {
+    if (!confirm('Sign out of admin panel?')) return;
+    const { signOut } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js");
+    await signOut(auth);
+    window.location.href = 'admin-login.html';
+  };
+
+  // Show toast (standalone so it works without app.js)
+  window.showToast = window.showToast || function(msg, type='success') {
+    let t = document.querySelector('.toast');
+    if (!t) { t = document.createElement('div'); t.className='toast'; document.body.appendChild(t); }
+    const icons = {success:'✅',error:'❌',info:'ℹ️'};
+    t.textContent = `${icons[type]||''} ${msg}`;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  };
+</script>
+<script>
+  function showPanel(name, el) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.admin-item').forEach(i => i.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    if (el) el.classList.add('active');
+  }
+
+  async function adminSignOut() {
+    if (!confirm('Sign out of admin panel?')) return;
+    const { getAuth, signOut } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js");
+    const { initializeApp, getApps } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js");
+    const apps = getApps();
+    const auth = getAuth(apps[0]);
+    await signOut(auth);
+    window.location.href = 'admin-login.html';
+  }
+</script>
+</body>
+</html>
