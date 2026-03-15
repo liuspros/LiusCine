@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard — LiusCine</title>
+<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  body{padding-top:0;}
+  .dash-layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+  .dash-main{padding:32px 36px;background:var(--bg);}
+  .dash-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px;}
+  .dash-topbar h1{font-size:24px;font-weight:900;letter-spacing:-0.5px;}
+  .dash-topbar p{font-size:13px;color:var(--muted);font-weight:400;margin-top:2px;}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+  .wallet-card{background:linear-gradient(135deg,#150028,#200040);border:1px solid var(--accent);border-radius:20px;padding:28px;position:relative;overflow:hidden;grid-column:span 2;box-shadow:0 0 40px rgba(108,0,255,0.15);}
+  .wallet-card::before{content:'₦';position:absolute;right:20px;top:10px;font-size:120px;font-weight:900;opacity:0.04;color:var(--accent);pointer-events:none;line-height:1;}
+  .wc-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+  .wc-balance{font-size:52px;font-weight:900;color:var(--accent);letter-spacing:-2px;line-height:1;}
+  .wc-sub{font-size:12px;color:var(--muted);margin:6px 0 20px;font-weight:400;}
+  .wc-progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px;}
+  .wc-progress{height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+  .wc-progress-fill{height:100%;background:linear-gradient(90deg,var(--purple-mid),var(--purple-light));border-radius:3px;}
+  .wc-actions{display:flex;gap:10px;}
+  .ref-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;grid-column:span 2;position:relative;overflow:hidden;}
+  .ref-card::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(16,185,129,0.1),transparent);border-radius:50%;}
+  .ref-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+  .ref-count{font-size:40px;font-weight:900;color:var(--green);letter-spacing:-1px;}
+  .ref-sub{font-size:12px;color:var(--muted);margin:4px 0 18px;font-weight:400;}
+  .ref-link-box{display:flex;background:var(--surface);border:1px solid var(--border2);border-radius:10px;overflow:hidden;margin-bottom:14px;}
+  .ref-link-text{flex:1;padding:10px 14px;font-size:12px;color:var(--accent);font-weight:600;word-break:break-all;}
+  .ref-copy-btn{padding:0 16px;background:var(--purple-mid);border:none;color:#fff;font-family:'Lexend',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:background 0.2s;white-space:nowrap;}
+  .ref-copy-btn:hover{background:var(--purple-glow);}
+  .ref-share-row{display:flex;gap:8px;}
+  .share-btn{flex:1;padding:9px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .share-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .dash-cols{display:grid;grid-template-columns:1fr 340px;gap:24px;margin-top:28px;}
+  .tasks-list{display:flex;flex-direction:column;gap:12px;}
+  .task-item{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:14px;transition:border-color 0.2s;}
+  .task-item:hover{border-color:var(--border2);}
+  .task-item.completed{opacity:0.5;}
+  .task-ico{width:44px;height:44px;background:rgba(108,0,255,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--accent);flex-shrink:0;}
+  .task-body{flex:1;}
+  .task-title{font-size:14px;font-weight:700;margin-bottom:3px;}
+  .task-desc{font-size:12px;color:var(--muted);font-weight:400;}
+  .task-reward{font-size:16px;font-weight:900;color:var(--green);letter-spacing:-0.5px;margin-right:12px;}
+  .task-btn{padding:8px 18px;background:var(--purple-mid);color:#fff;border:none;border-radius:8px;font-family:'Lexend',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+  .task-btn:hover{background:var(--purple-glow);}
+  .task-btn.done{background:var(--card2);color:var(--green);border:1px solid rgba(16,185,129,0.3);cursor:default;}
+  .section-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+  .section-card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  .section-card-header h3{font-size:14px;font-weight:700;}
+  .txn-row{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid rgba(45,0,82,0.3);transition:background 0.2s;}
+  .txn-row:hover{background:rgba(108,0,255,0.04);}
+  .txn-row:last-child{border-bottom:none;}
+  .txn-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .txn-dot.plus{background:rgba(16,185,129,0.1);color:var(--green);}
+  .txn-dot.minus{background:rgba(239,68,68,0.1);color:var(--red);}
+  .txn-info{flex:1;}
+  .txn-info-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+  .txn-info-date{font-size:11px;color:var(--muted);font-weight:400;}
+  .txn-info-amt{font-size:14px;font-weight:800;}
+  .lb-row{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid rgba(45,0,82,0.3);}
+  .lb-row:last-child{border-bottom:none;}
+  .lb-rank{width:24px;font-size:13px;font-weight:800;color:var(--muted);text-align:center;}
+  .lb-rank.top{color:var(--gold);}
+  .lb-avatar{width:32px;height:32px;background:var(--purple-deep);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:13px;}
+  .lb-name{flex:1;font-size:13px;font-weight:600;}
+  .lb-refs{font-size:12px;color:var(--green);font-weight:700;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+  .modal-overlay.open{opacity:1;pointer-events:all;}
+  .modal{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:32px;width:100%;max-width:420px;transform:scale(0.95);transition:transform 0.3s;}
+  .modal-overlay.open .modal{transform:scale(1);}
+  .modal h2{font-size:20px;font-weight:900;margin-bottom:6px;}
+  .modal p{font-size:13px;color:var(--muted);font-weight:400;margin-bottom:24px;}
+  .modal-close{float:right;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;}
+  @media(max-width:1200px){.stats-grid{grid-template-columns:1fr 1fr;}.wallet-card,.ref-card{grid-column:span 1;}}
+  @media(max-width:900px){.dash-cols{grid-template-columns:1fr;}.dash-main{padding:20px;}}
+
+  @media(max-width:1200px){
+    .stats-grid{grid-template-columns:1fr 1fr!important;}
+    .wallet-card,.ref-card{grid-column:span 1!important;}
+    .dash-cols{grid-template-columns:1fr!important;}
+  }
+  @media(max-width:900px){
+    .dash-layout{grid-template-columns:1fr!important;}
+    .sidebar{display:none!important;}
+    .dash-main{padding:16px!important;}
+    .dash-topbar{flex-direction:column;align-items:flex-start;gap:12px;}
+    .dash-topbar h1{font-size:20px!important;}
+    .stats-grid{grid-template-columns:1fr 1fr!important;gap:12px!important;}
+    .wc-balance{font-size:38px!important;}
+    .ref-count{font-size:32px!important;}
+    .ref-share-row{flex-wrap:wrap;}
+    .share-btn{flex:auto;min-width:calc(33% - 6px);}
+  }
+  @media(max-width:768px){
+    .dash-main{padding:14px!important;}
+    .stats-grid{grid-template-columns:1fr 1fr!important;}
+    .wc-balance{font-size:32px!important;}
+    .task-item{flex-wrap:wrap;gap:8px;}
+    .task-body{min-width:calc(100% - 100px);}
+    .task-btn{padding:7px 14px;font-size:11px;}
+    .task-reward{font-size:14px;}
+    .txn-row{flex-wrap:wrap;gap:6px;}
+    .txn-info{min-width:calc(100% - 80px);}
+    .lb-row{padding:10px 14px;}
+    .modal{padding:20px 16px!important;}
+    .modal h2{font-size:18px!important;}
+  }
+  @media(max-width:480px){
+    .dash-main{padding:12px!important;}
+    .stats-grid{grid-template-columns:1fr!important;}
+    .wallet-card,.ref-card{grid-column:span 1!important;}
+    .wc-balance{font-size:40px!important;}
+    .wc-actions{flex-wrap:wrap;gap:8px;}
+    .wc-actions .btn{flex:1;justify-content:center;}
+    .ref-link-box .ref-link-text{font-size:11px;}
+    .task-item{padding:12px;}
+    .task-ico{width:36px;height:36px;font-size:14px;}
+    .task-title{font-size:13px;}
+    .task-desc{font-size:11px;}
+    .dash-topbar .nav-right{flex-wrap:wrap;width:100%;}
+    .dash-topbar .nav-right .btn{flex:1;justify-content:center;font-size:12px;}
+  }
+  @media(max-width:360px){
+    .wc-balance{font-size:34px!important;}
+    .ref-count{font-size:28px!important;}
+    .share-btn{font-size:11px;padding:8px 6px;}
+  }
+
+
+  /* ── MOBILE NAV ── */
+  .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:6px; background:none; border:none; z-index:200; }
+  .hamburger span { width:22px; height:2px; background:var(--text); border-radius:2px; transition:all 0.3s; display:block; }
+  .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity:0; }
+  .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+  .mobile-menu {
+    display:none; position:fixed; top:60px; left:0; right:0;
+    background:var(--bg2); border-bottom:1px solid var(--border);
+    padding:16px; z-index:999; flex-direction:column; gap:4px;
+    animation:slideDown 0.25s ease;
+  }
+  @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+  .mobile-menu.open { display:flex; }
+  .mobile-menu a {
+    display:flex; align-items:center; gap:12px;
+    padding:12px 16px; border-radius:10px;
+    color:var(--text2); text-decoration:none; font-size:14px; font-weight:600;
+    transition:background 0.2s;
+  }
+  .mobile-menu a:hover { background:var(--card); color:var(--text); }
+  .mobile-menu a i { width:18px; text-align:center; color:var(--accent); }
+  .mobile-menu-actions { display:flex; gap:8px; margin-top:8px; padding-top:12px; border-top:1px solid var(--border); }
+  .mobile-menu-actions .btn { flex:1; justify-content:center; font-size:13px; }
+  @media(max-width:768px) {
+    .hamburger { display:flex; }
+    .nav-links { display:none!important; }
+    .nav-right { display:none!important; }
+  }
+
+</style>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+</head>
+<body>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">Lius<span>Cine</span></a>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-item active"><span class="sidebar-icon"><i class="fa-solid fa-house"></i></span> Dashboard</a>
+      <a href="movies.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-clapperboard"></i></span> Browse Movies</a>
+      <a href="watchlist.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-bookmark"></i></span> My Watchlist</a>
+      <a href="referrals.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-users"></i></span> My Referrals</a>
+      <a href="withdrawals.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-clock-rotate-left"></i></span> Withdrawal History</a>
+      <a href="leaderboard.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-trophy"></i></span> Leaderboard</a>
+      <a href="profile.html" class="sidebar-item"><span class="sidebar-icon"><i class="fa-solid fa-user"></i></span> My Profile</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--card);border-radius:12px;margin-bottom:12px;">
+        <div style="width:38px;height:38px;background:var(--purple-deep);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);"><i class="fa-solid fa-user"></i></div>
+        <div><div style="font-size:13px;font-weight:700;">Julius O.</div><div style="font-size:11px;color:var(--muted);">Free Plan</div></div>
+      </div>
+      <a href="profile.html" class="btn btn-ghost btn-full btn-sm" style="margin-bottom:8px;"><i class="fa-solid fa-user"></i> Profile</a>
+      <button class="btn btn-ghost btn-full btn-sm" style="color:var(--red);border-color:rgba(239,68,68,0.3);" onclick="handleSignOut()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+    <!-- Premium expiry warning banner -->
+    <div id="premiumExpiry" style="display:none;background:rgba(240,180,41,0.1);border:1px solid rgba(240,180,41,0.3);border-radius:12px;padding:14px 20px;margin-bottom:20px;align-items:center;gap:12px;flex-wrap:wrap;">
+      <i class="fa-solid fa-triangle-exclamation" style="color:var(--gold);font-size:18px;flex-shrink:0;"></i>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:13px;font-weight:700;color:var(--gold);">Premium expires in <span class="expiry-days">3</span> days!</div>
+        <div style="font-size:12px;color:var(--muted);">Renew now to keep your referral link and task earnings active.</div>
+      </div>
+      <button class="btn btn-sm" id="renewBtn" style="background:var(--gold);color:#000;border:none;font-weight:700;"><i class="fa-solid fa-crown"></i> Renew Premium</button>
+    </div>
+
+    <div class="dash-topbar">
+      <div><h1>Welcome back, Julius <i class="fa-solid fa-hand-wave" style="color:var(--gold)"></i></h1><p>Here's your LiusCine overview for today</p></div>
+      <div style="display:flex;gap:10px;">
+        <a href="movies.html" class="btn btn-ghost btn-sm"><i class="fa-solid fa-clapperboard"></i> Browse Movies</a>
+        <button id="upgradeBtn0" class="btn btn-primary btn-sm"><i class="fa-solid fa-crown"></i> Go Premium</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="wallet-card">
+        <div class="wc-label"><i class="fa-solid fa-wallet"></i> Total Earnings Wallet</div>
+        <div class="wc-balance">₦3,200</div>
+        <div class="wc-sub">₦1,800 more to unlock withdrawal</div>
+        <div class="wc-progress-label"><span>Progress to ₦5,000</span><span style="color:var(--accent)">64%</span></div>
+        <div class="wc-progress"><div class="wc-progress-fill" style="width:64%"></div></div>
+        <div class="wc-actions">
+          <button class="btn btn-primary btn-sm" onclick="document.getElementById('withdrawModal').classList.add('open')"><i class="fa-solid fa-money-bill-transfer"></i> Withdraw</button>
+          <button class="btn btn-ghost btn-sm"><i class="fa-solid fa-chart-line"></i> History</button>
+        </div>
+      </div>
+      <div class="ref-card" id="refCard">
+
+        <!-- FREE USER VIEW — completely hidden content, only upgrade prompt -->
+        <div id="refFreeLock" style="text-align:center;padding:8px 0;">
+          <div style="width:52px;height:52px;background:rgba(108,0,255,0.12);border:1px solid rgba(108,0,255,0.25);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;"><i class="fa-solid fa-lock" style="font-size:20px;color:var(--accent)"></i></div>
+          <h3 style="font-size:15px;font-weight:800;margin-bottom:6px;">Referral Program — Premium Only</h3>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:16px;font-weight:400;line-height:1.7;">Upgrade to Premium to get your referral link and earn ₦500 every time someone pays through your link.</p>
+          <button class="btn btn-primary btn-sm" id="upgradeBtn1" style="width:100%;justify-content:center;padding:12px;">
+            <i class="fa-solid fa-crown"></i> Upgrade to Premium — ₦1,000
+          </button>
+        </div>
+
+        <!-- PREMIUM USER VIEW — hidden by default, shown after auth check -->
+        <div id="refPremiumContent" style="display:none;">
+          <div class="ref-label"><i class="fa-solid fa-link"></i> Your Referral Link</div>
+          <div class="ref-count" id="refCount">0</div>
+          <div class="ref-sub" id="refSubText">Total referrals · ₦0 earned</div>
+          <div class="ref-link-box" style="margin-top:14px;">
+            <div class="ref-link-text" id="refLink" style="font-size:11px;word-break:break-all;">—</div>
+            <button class="ref-copy-btn" id="refCopyBtn"><i class="fa-solid fa-copy"></i> Copy</button>
+          </div>
+          <div class="ref-share-row">
+            <button class="share-btn" id="shareWA"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+            <button class="share-btn" id="shareIG"><i class="fa-brands fa-instagram"></i> Instagram</button>
+            <button class="share-btn" id="shareTT"><i class="fa-brands fa-tiktok"></i> TikTok</button>
+          </div>
+        </div>
+
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><i class="fa-solid fa-user-plus"></i> Referrals Today</div>
+        <div class="stat-value" style="color:var(--green)">2</div>
+        <div class="stat-change"><i class="fa-solid fa-arrow-up"></i> +₦1,000 earned today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><i class="fa-solid fa-list-check"></i> Tasks Completed</div>
+        <div class="stat-value" style="color:var(--accent)">5</div>
+        <div class="stat-change"><i class="fa-solid fa-arrow-up"></i> +₦500 from tasks</div>
+      </div>
+    </div>
+
+    <div class="dash-cols">
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <h2 style="font-size:16px;font-weight:800;"><i class="fa-solid fa-list-check" style="color:var(--accent)"></i> Daily Tasks</h2>
+          <span class="badge badge-gold" id="tasksRemainingBadge"><i class="fa-solid fa-clock"></i> Loading...</span>
+        </div>
+
+        <!-- Premium lock banner for tasks — shown for free members -->
+        <div class="tasks-lock-banner" id="tasksLockBanner" style="display:none;">
+          <div class="lock-badge"><i class="fa-solid fa-lock"></i></div>
+          <div class="tasks-lock-banner-text">
+            <h4>Earn with Tasks — Premium Only</h4>
+            <p>Upgrade to Premium to complete tasks and earn ₦100 per task + ₦500 per referral.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="upgradeBtn3" style="white-space:nowrap;flex-shrink:0;">
+            <i class="fa-solid fa-crown"></i> Upgrade
+          </button>
+        </div>
+
+        <div class="tasks-list" id="tasksList">
+
+          <!-- Task 1: Daily check-in (auto-handled by Firebase) -->
+          <div class="task-item checkin-task" id="task-checkin">
+            <div class="task-ico"><i class="fa-solid fa-calendar-check"></i></div>
+            <div class="task-body">
+              <div class="task-title">Daily Check-in</div>
+              <div class="task-desc">Log in every day to earn ₦50 automatically</div>
+            </div>
+            <span class="task-reward">+₦50</span>
+            <button class="task-btn done" id="checkin-btn"><i class="fa-solid fa-spinner fa-spin"></i> Loading</button>
+          </div>
+
+          <!-- Task 2: Follow Instagram — opens Instagram, then shows verify button -->
+          <div class="task-item" id="task-instagram">
+            <div class="task-ico"><i class="fa-brands fa-instagram"></i></div>
+            <div class="task-body">
+              <div class="task-title">Follow on Instagram</div>
+              <div class="task-desc">Follow <strong>@lius_creative</strong> on Instagram to earn ₦100</div>
+            </div>
+            <span class="task-reward">+₦100</span>
+            <button class="task-btn" id="btn-instagram" onclick="startTask('instagram', 'https://www.instagram.com/lius_creative', 'Follow on Instagram')">
+              <i class="fa-brands fa-instagram"></i> Follow
+            </button>
+          </div>
+
+          <!-- Task 3: WhatsApp Status — opens WhatsApp with pre-filled message -->
+          <div class="task-item" id="task-whatsapp">
+            <div class="task-ico"><i class="fa-brands fa-whatsapp"></i></div>
+            <div class="task-body">
+              <div class="task-title">Share to WhatsApp Status</div>
+              <div class="task-desc">Share your referral link on your WhatsApp status to earn ₦100</div>
+            </div>
+            <span class="task-reward">+₦100</span>
+            <button class="task-btn" id="btn-whatsapp" onclick="startTask('whatsapp-status', null, 'Share to WhatsApp Status')">
+              <i class="fa-brands fa-whatsapp"></i> Share
+            </button>
+          </div>
+
+          <!-- Task 4: TikTok — opens TikTok, then shows verify button -->
+          <div class="task-item" id="task-tiktok">
+            <div class="task-ico"><i class="fa-brands fa-tiktok"></i></div>
+            <div class="task-body">
+              <div class="task-title">Follow on TikTok</div>
+              <div class="task-desc">Follow <strong>@liuscine</strong> on TikTok to earn ₦100</div>
+            </div>
+            <span class="task-reward">+₦100</span>
+            <button class="task-btn" id="btn-tiktok" onclick="startTask('tiktok-share', 'https://www.tiktok.com/@liuscine', 'Follow on TikTok')">
+              <i class="fa-brands fa-tiktok"></i> Follow
+            </button>
+          </div>
+
+          <!-- Task 5: Invite friends — auto-tracked via referral count -->
+          <div class="task-item" id="task-invite">
+            <div class="task-ico"><i class="fa-solid fa-users"></i></div>
+            <div class="task-body">
+              <div class="task-title">Invite 3 Friends Today</div>
+              <div class="task-desc">Get 3 people to register using your referral link</div>
+            </div>
+            <span class="task-reward">+₦1,500</span>
+            <button class="task-btn" id="btn-invite" onclick="copyReferralLink()">
+              <i class="fa-solid fa-link"></i> Copy Link
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Task confirm modal -->
+        <div class="modal-overlay" id="taskConfirmModal" onclick="if(event.target===this)closeTaskModal()">
+          <div class="modal" style="max-width:380px;text-align:center;">
+            <div id="taskModalIcon" style="font-size:48px;margin-bottom:16px;"></div>
+            <h2 id="taskModalTitle" style="font-size:18px;font-weight:800;margin-bottom:8px;"></h2>
+            <p id="taskModalDesc" style="font-size:13px;color:var(--muted);margin-bottom:24px;font-weight:400;line-height:1.7;"></p>
+            <div style="display:flex;gap:10px;">
+              <button class="btn btn-ghost btn-full" onclick="closeTaskModal()"><i class="fa-solid fa-xmark"></i> Not Yet</button>
+              <button class="btn btn-primary btn-full" id="taskConfirmBtn" onclick="confirmTask()"><i class="fa-solid fa-check"></i> Yes, I Did It!</button>
+            </div>
+          </div>
+        </div><!-- end tasks-list -->
+
+        <div style="margin-top:28px;" class="txn-section-wrap">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h2 style="font-size:16px;font-weight:800;"><i class="fa-solid fa-clock-rotate-left" style="color:var(--accent)"></i> Transaction History</h2>
+            <a href="#" class="see-all" style="font-size:12px;">View All <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+          <div class="section-card lb-section-card">
+            <div class="txn-row"><div class="txn-dot plus"><i class="fa-solid fa-user-plus"></i></div><div class="txn-info"><div class="txn-info-title">Referral Bonus — Chidi O.</div><div class="txn-info-date">Today, 2:14 PM</div></div><span class="txn-info-amt" style="color:var(--green)">+₦500</span></div>
+            <div class="txn-row"><div class="txn-dot plus"><i class="fa-solid fa-check"></i></div><div class="txn-info"><div class="txn-info-title">Task: Follow on Instagram</div><div class="txn-info-date">Today, 11:05 AM</div></div><span class="txn-info-amt" style="color:var(--green)">+₦100</span></div>
+            <div class="txn-row"><div class="txn-dot plus"><i class="fa-solid fa-calendar-day"></i></div><div class="txn-info"><div class="txn-info-title">Daily Check-in Bonus</div><div class="txn-info-date">Today, 9:01 AM</div></div><span class="txn-info-amt" style="color:var(--green)">+₦50</span></div>
+            <div class="txn-row"><div class="txn-dot plus"><i class="fa-solid fa-user-plus"></i></div><div class="txn-info"><div class="txn-info-title">Referral Bonus — Fatima Y.</div><div class="txn-info-date">Yesterday, 6:30 PM</div></div><span class="txn-info-amt" style="color:var(--green)">+₦500</span></div>
+            <div class="txn-row"><div class="txn-dot minus"><i class="fa-solid fa-arrow-up-from-bracket"></i></div><div class="txn-info"><div class="txn-info-title">Withdrawal — GTBank ***4521</div><div class="txn-info-date">Mar 10, 2026</div></div><span class="txn-info-amt" style="color:var(--red)">-₦5,000</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="background:linear-gradient(135deg,#150025,var(--card));border:1px solid var(--accent);border-radius:18px;padding:24px;text-align:center;margin-bottom:20px;box-shadow:0 0 32px rgba(108,0,255,0.12);">
+          <i class="fa-solid fa-crown" style="font-size:32px;color:var(--accent);margin-bottom:8px;display:block;"></i>
+          <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">Upgrade to Premium</h3>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:16px;font-weight:400;line-height:1.7;">HD downloads, zero ads, priority requests & exclusive content.</p>
+          <button class="btn btn-primary btn-full" id="upgradeBtn4"><i class="fa-solid fa-crown"></i> Upgrade — ₦1,000</button>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-header">
+            <h3><i class="fa-solid fa-trophy" style="color:var(--gold)"></i> Top Referrers</h3>
+            <a href="#" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:600;">Full board <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+          <div class="lb-row"><div class="lb-rank top"><i class="fa-solid fa-medal"></i></div><div class="lb-avatar"><i class="fa-solid fa-user"></i></div><div class="lb-name">Adeyemi K.</div><div class="lb-refs">48 refs</div></div>
+          <div class="lb-row"><div class="lb-rank top"><i class="fa-solid fa-medal"></i></div><div class="lb-avatar"><i class="fa-solid fa-user"></i></div><div class="lb-name">Ngozi A.</div><div class="lb-refs">35 refs</div></div>
+          <div class="lb-row"><div class="lb-rank top"><i class="fa-solid fa-medal"></i></div><div class="lb-avatar"><i class="fa-solid fa-user"></i></div><div class="lb-name">Emeka B.</div><div class="lb-refs">29 refs</div></div>
+          <div class="lb-row"><div class="lb-rank">4</div><div class="lb-avatar"><i class="fa-solid fa-user"></i></div><div class="lb-name">Fatima M.</div><div class="lb-refs">22 refs</div></div>
+          <div class="lb-row" style="background:rgba(108,0,255,0.06);"><div class="lb-rank" style="color:var(--accent)"><i class="fa-solid fa-minus"></i></div><div class="lb-avatar" style="background:var(--purple-deep);"><i class="fa-solid fa-user"></i></div><div class="lb-name" style="color:var(--accent);">You (Julius)</div><div class="lb-refs">7 refs</div></div>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-top:20px;">
+          <h3 style="font-size:14px;font-weight:700;margin-bottom:6px;"><i class="fa-solid fa-clapperboard" style="color:var(--accent)"></i> Request a Movie</h3>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:14px;font-weight:400;">Can't find a movie? Request it and we'll add it.</p>
+          <input class="input-standalone movie-request-input" placeholder="Enter movie title..." style="margin-bottom:10px;font-size:13px;"/>
+          <button class="btn btn-outline btn-full btn-sm" onclick="submitMovieRequest()"><i class="fa-solid fa-paper-plane"></i> Submit Request</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="withdrawModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('withdrawModal').classList.remove('open')"><i class="fa-solid fa-xmark"></i></button>
+    <h2><i class="fa-solid fa-money-bill-transfer" style="color:var(--accent)"></i> Withdraw Earnings</h2>
+    <p>Minimum withdrawal is ₦5,000. Your current balance: <strong style="color:var(--accent)">₦3,200</strong></p>
+    <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px 16px;font-size:13px;color:var(--red);margin-bottom:20px;font-weight:500;"><i class="fa-solid fa-triangle-exclamation"></i> You need ₦1,800 more to reach the ₦5,000 minimum. Keep referring!</div>
+    <div class="form-group"><label class="form-label"><i class="fa-solid fa-building-columns"></i> Bank Name</label><input class="input-standalone bank-input" placeholder="e.g. GTBank, Access, Opay"/></div>
+    <div class="form-group"><label class="form-label"><i class="fa-solid fa-hashtag"></i> Account Number</label><input class="input-standalone account-input" placeholder="10-digit account number"/></div>
+    <div class="form-group"><label class="form-label"><i class="fa-solid fa-naira-sign"></i> Amount (₦)</label><input class="input-standalone amount-input" placeholder="Minimum ₦5,000" type="number"/></div>
+    <button class="btn btn-primary btn-full" onclick="requestWithdrawal()"><i class="fa-solid fa-paper-plane"></i> Request Withdrawal</button>
+  </div>
+</div>
+
+<div class="toast"></div>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+
+<script type="module">
+// ═══════════════════════════════════════════════════════
+//  DASHBOARD — Self-contained module
+//  All Firebase logic lives here, exposed via window.*
+// ═══════════════════════════════════════════════════════
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, updateDoc, increment,
+  collection, addDoc, getDocs, query, where, orderBy, limit, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const CFG = { apiKey:"AIzaSyBnPxRn13A1bEo901P8O3VE5X_nKvclFpI", authDomain:"liuspros.firebaseapp.com", projectId:"liuspros", storageBucket:"liuspros.firebasestorage.app", messagingSenderId:"1072846880138", appId:"1:1072846880138:web:d095b5196563844e9edc73" };
+const PAYSTACK_KEY   = 'pk_live_051bcbe2840110639b09a2ef72b70fdbcf6a6220';
+const MIN_WITHDRAWAL = 5000;
+const PREMIUM_AMOUNT = 1000;
+const TASK_REWARD    = 100;
+const CHECKIN_REWARD = 50;
+const REFERRAL_BONUS = 500;
+
+const fapp = getApps().length > 0 ? getApp() : initializeApp(CFG);
+const auth = getAuth(fapp);
+const db   = getFirestore(fapp);
+
+// ── TOAST ──────────────────────────────────────
+window.showToast = function(msg, type='success') {
+  let t = document.querySelector('.toast');
+  if (!t) { t=document.createElement('div'); t.className='toast'; document.body.appendChild(t); }
+  const icons={success:'✅',error:'❌',info:'ℹ️',warning:'⚠️'};
+  t.textContent=`${icons[type]||''}  ${msg}`;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+};
+
+// ── UPGRADE / PAYSTACK ─────────────────────────
+function doUpgrade(user) {
+  if (!window.PaystackPop) {
+    showToast('Payment system not loaded yet. Please wait a moment and try again.','error');
+    return;
+  }
+  const handler = window.PaystackPop.setup({
+    key:      PAYSTACK_KEY,
+    email:    user.email,
+    amount:   PREMIUM_AMOUNT * 100,
+    currency: 'NGN',
+    ref:      'LC-PREM-' + Date.now(),
+    callback: async function(response) {
+      try {
+        const uRef = doc(db,'users',user.uid);
+        const uSnap = await getDoc(uRef);
+        const uData = uSnap.data();
+
+        // Upgrade user
+        await updateDoc(uRef, { premium:true, premiumActivatedAt:serverTimestamp() });
+        await addDoc(collection(db,'transactions'), {
+          userId:user.uid, type:'premium', amount:PREMIUM_AMOUNT,
+          description:'Premium Subscription Activated', paystackRef:response.reference,
+          createdAt:serverTimestamp()
+        });
+
+        // Credit referrer if applicable
+        const referredBy = uData?.referredBy;
+        if (referredBy && referredBy !== user.uid) {
+          await creditReferrer(referredBy, user);
+        }
+
+        showToast('🎉 You are now Premium! Referral program & tasks unlocked.','success');
+        setTimeout(()=>window.location.reload(), 1500);
+      } catch(e) { showToast('Payment done but upgrade failed. Contact support.','error'); }
+    },
+    onClose: function() { showToast('Payment cancelled','info'); }
+  });
+  handler.openIframe();
+}
+
+async function creditReferrer(referrerId, newUser) {
+  try {
+    const refSnap = await getDoc(doc(db,'users',referrerId));
+    if (!refSnap.exists()) return;
+    if (referrerId === newUser.uid) return;
+    // Check not already credited
+    const dupQ  = query(collection(db,'transactions'), where('userId','==',referrerId), where('type','==','referral'), where('referredUid','==',newUser.uid), limit(1));
+    const dupSnap = await getDocs(dupQ);
+    if (!dupSnap.empty) return;
+    await updateDoc(doc(db,'users',referrerId), { balance:increment(REFERRAL_BONUS), referrals:increment(1) });
+    await addDoc(collection(db,'transactions'), {
+      userId:referrerId, type:'referral', amount:REFERRAL_BONUS,
+      description:`Referral Bonus — ${newUser.displayName||newUser.email} went Premium`,
+      referredUid:newUser.uid, referredEmail:newUser.email, createdAt:serverTimestamp()
+    });
+  } catch(e) { console.log('Referrer credit error:',e); }
+}
+
+// Wire all upgrade buttons once DOM is ready
+function wireUpgradeButtons(user) {
+  const ids = ['upgradeBtn0','upgradeBtn1','upgradeBtn2','upgradeBtn3','upgradeBtn4','renewBtn'];
+  ids.forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.onclick = () => doUpgrade(user);
+  });
+}
+
+// ── SIGN OUT ───────────────────────────────────
+window.handleSignOut = async function() {
+  await signOut(auth);
+  window.location.href = 'index.html';
+};
+
+// ── COPY helper (works on HTTP and HTTPS) ──────
+function copyToClipboard(text) {
+  // Try modern API first
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text)
+      .then(() => showToast('Referral link copied! 🔗','success'))
+      .catch(() => fallbackCopy(text));
+  }
+  fallbackCopy(text);
+}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0;';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try { document.execCommand('copy'); showToast('Referral link copied! 🔗','success'); }
+  catch(e) { showToast('Could not copy. Please copy manually.','warning'); }
+  document.body.removeChild(ta);
+}
+
+// ── LOAD DASHBOARD ─────────────────────────────
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = 'login.html'; return; }
+
+  wireUpgradeButtons(user);
+
+  try {
+    const uSnap   = await getDoc(doc(db,'users',user.uid));
+    if (!uSnap.exists()) { window.location.href = 'login.html'; return; }
+    const u       = uSnap.data();
+    const balance = u.balance || 0;
+    const refs    = u.referrals || 0;
+    const premium = u.premium || false;
+    const name    = u.name || user.displayName || 'User';
+
+    // ── Update name & plan ──
+    document.querySelectorAll('.user-name').forEach(el => el.textContent = name.split(' ')[0]);
+    document.querySelectorAll('.user-plan').forEach(el => {
+      el.textContent = premium ? 'Premium' : 'Free Plan';
+      el.style.color = premium ? 'var(--gold)' : 'var(--muted)';
+    });
+
+    // ── Wallet ──
+    const walletEl = document.querySelector('.wc-balance');
+    if (walletEl) walletEl.textContent = '₦' + balance.toLocaleString();
+    const subEl = document.querySelector('.wc-sub');
+    if (subEl) {
+      const rem = Math.max(MIN_WITHDRAWAL - balance, 0);
+      subEl.textContent = rem > 0 ? `₦${rem.toLocaleString()} more to unlock withdrawal` : 'You can withdraw now! 🎉';
+    }
+    const progress = Math.min((balance / MIN_WITHDRAWAL) * 100, 100);
+    const fillEl   = document.querySelector('.wc-progress-fill');
+    if (fillEl) fillEl.style.width = progress + '%';
+    const pctEl = document.querySelector('.wc-progress-label span:last-child');
+    if (pctEl) pctEl.textContent = Math.round(progress) + '%';
+
+    // ── PREMIUM GATE ──
+    // Show/hide referral card based on premium status
+    const freeLock     = document.getElementById('refFreeLock');
+    const premContent  = document.getElementById('refPremiumContent');
+    const tasksLock    = document.getElementById('tasksLockBanner');
+    const tasksList    = document.getElementById('tasksList');
+    const tasksRemBadge = document.getElementById('tasksRemainingBadge');
+
+    if (!premium) {
+      // Free user — show lock, hide link completely
+      if (freeLock)    freeLock.style.display    = 'block';
+      if (premContent) premContent.style.display = 'none';
+      if (tasksLock)   tasksLock.style.display   = 'flex';
+      if (tasksRemBadge) tasksRemBadge.innerHTML = '<i class="fa-solid fa-lock"></i> Premium Only';
+      if (tasksList) {
+        tasksList.querySelectorAll('.task-item').forEach(item => {
+          item.classList.add('locked-task');
+          const btn = item.querySelector('.task-btn');
+          if (btn && !btn.classList.contains('done')) {
+            btn.innerHTML = '<i class="fa-solid fa-lock"></i> Locked';
+            btn.style.cssText = 'background:var(--card2);color:var(--muted);cursor:not-allowed;';
+            btn.onclick = () => showToast('Upgrade to Premium to earn from tasks 👑','info');
+          }
+        });
+      }
+    } else {
+      // Premium user — show link, hide lock
+      if (freeLock)    freeLock.style.display    = 'none';
+      if (premContent) premContent.style.display = 'block';
+      if (tasksLock)   tasksLock.style.display   = 'none';
+      if (tasksRemBadge) tasksRemBadge.innerHTML = '<i class="fa-solid fa-clock"></i> Tasks available';
+
+      // Set referral link
+      const fullRefLink = `https://${window.location.host}/login.html?ref=${user.uid}`;
+      const refLinkEl   = document.getElementById('refLink');
+      if (refLinkEl) refLinkEl.textContent = fullRefLink;
+
+      // Referral count
+      const refCountEl = document.querySelector('.ref-count');
+      if (refCountEl) refCountEl.textContent = refs;
+      const refSubEl   = document.querySelector('.ref-sub');
+      if (refSubEl) refSubEl.textContent = `Total referrals · ₦${(refs * REFERRAL_BONUS).toLocaleString()} earned`;
+
+      // Copy button — robust clipboard
+      const copyBtn = document.getElementById('refCopyBtn');
+      if (copyBtn) copyBtn.onclick = () => copyToClipboard(fullRefLink);
+
+      // Share buttons
+      const shareText = `🎬 Watch free Nollywood movies & earn real money on LiusCine!
+
+✅ 500+ free movies
+💰 Earn ₦500 per referral
+📥 HD downloads
+
+Join now 👇
+${fullRefLink}`;
+      const wa  = document.getElementById('shareWA');
+      const ig  = document.getElementById('shareIG');
+      const tt  = document.getElementById('shareTT');
+      if (wa) wa.onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`,'_blank');
+      if (ig) ig.onclick = () => copyToClipboard(fullRefLink);
+      if (tt) tt.onclick = () => copyToClipboard(fullRefLink);
+    }
+
+    // ── Stat cards ──
+    const statVals = document.querySelectorAll('.stat-value');
+    if (statVals[0]) statVals[0].textContent = u.todayReferrals || 0;
+    if (statVals[1]) statVals[1].textContent = (u.tasksCompleted||[]).length;
+
+    // ── Load transactions ──
+    await loadTransactions(user.uid);
+
+    // ── Load leaderboard ──
+    await loadLeaderboard(user.uid);
+
+    // ── Daily check-in ──
+    await handleCheckin(user.uid, u);
+
+    // ── Premium expiry check ──
+    if (premium && u.premiumActivatedAt) {
+      const activatedAt = u.premiumActivatedAt.toDate();
+      const expiresAt   = new Date(activatedAt);
+      expiresAt.setDate(expiresAt.getDate() + 30);
+      const daysLeft    = Math.ceil((expiresAt - new Date()) / (1000*60*60*24));
+      if (daysLeft <= 0) {
+        await updateDoc(doc(db,'users',user.uid), { premium:false, premiumActivatedAt:null });
+        showToast('Your Premium has expired. Renew to keep earning!','warning');
+        setTimeout(()=>window.location.reload(), 2000);
+      } else if (daysLeft <= 3) {
+        const expiryBanner = document.getElementById('premiumExpiry');
+        if (expiryBanner) {
+          expiryBanner.style.display = 'flex';
+          const daysEl = expiryBanner.querySelector('.expiry-days');
+          if (daysEl) daysEl.textContent = daysLeft;
+        }
+      }
+    }
+
+  } catch(e) {
+    console.error('Dashboard error:',e);
+    showToast('Error loading dashboard','error');
+  }
+});
+
+// ── TRANSACTIONS ───────────────────────────────
+async function loadTransactions(uid) {
+  try {
+    const q    = query(collection(db,'transactions'), where('userId','==',uid), orderBy('createdAt','desc'), limit(5));
+    const snap = await getDocs(q);
+    if (snap.empty) return;
+    const iconMap = {
+      referral:{icon:'fa-user-plus',cls:'plus'},
+      task:{icon:'fa-check',cls:'plus'},
+      checkin:{icon:'fa-calendar-day',cls:'plus'},
+      withdrawal:{icon:'fa-arrow-up-from-bracket',cls:'minus'},
+      premium:{icon:'fa-crown',cls:'minus'}
+    };
+    const rows = snap.docs.map(d => {
+      const t    = d.data();
+      const ico  = iconMap[t.type]||{icon:'fa-circle',cls:'plus'};
+      const plus = ico.cls==='plus';
+      const date = t.createdAt?.toDate?.()?.toLocaleDateString('en-NG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})||'Just now';
+      return `<div class="txn-row">
+        <div class="txn-dot ${ico.cls}"><i class="fa-solid ${ico.icon}"></i></div>
+        <div class="txn-info"><div class="txn-info-title">${t.description||t.type}</div><div class="txn-info-date">${date}</div></div>
+        <span class="txn-info-amt" style="color:var(--${plus?'green':'red'})">${plus?'+':'-'}₦${(t.amount||0).toLocaleString()}</span>
+      </div>`;
+    }).join('');
+    const wrap = document.querySelector('.txn-section-card');
+    if (wrap) {
+      const hdr = wrap.querySelector('.section-card-header');
+      wrap.innerHTML = '';
+      if (hdr) wrap.appendChild(hdr);
+      wrap.insertAdjacentHTML('beforeend', rows);
+    }
+  } catch(e) { console.log('Transactions error:',e); }
+}
+
+// ── LEADERBOARD ────────────────────────────────
+async function loadLeaderboard(currentUid) {
+  try {
+    const q    = query(collection(db,'users'), orderBy('referrals','desc'), limit(5));
+    const snap = await getDocs(q);
+    const medals = ['🥇','🥈','🥉'];
+    const rows   = snap.docs.map((d,i) => {
+      const u    = d.data();
+      const isMe = d.id === currentUid;
+      return `<div class="lb-row" ${isMe?'style="background:rgba(108,0,255,0.06)"':''}>
+        <div class="lb-rank ${i<3?'top':''}">${i<3?medals[i]:i+1}</div>
+        <div class="lb-avatar"><i class="fa-solid fa-user"></i></div>
+        <div class="lb-name" ${isMe?'style="color:var(--accent)"':''}>${isMe?'You ('+u.name?.split(' ')[0]+')':u.name?.split(' ')[0]||'User'}</div>
+        <div class="lb-refs">${u.referrals||0} refs</div>
+      </div>`;
+    }).join('');
+    const lb = document.querySelector('.lb-section-card');
+    if (lb && rows) {
+      const hdr = lb.querySelector('.section-card-header');
+      lb.innerHTML = '';
+      if (hdr) lb.appendChild(hdr);
+      lb.insertAdjacentHTML('beforeend', rows);
+    }
+  } catch(e) { console.log('Leaderboard error:',e); }
+}
+
+// ── DAILY CHECK-IN ─────────────────────────────
+async function handleCheckin(uid, userData) {
+  try {
+    const today    = new Date().toDateString();
+    const last     = userData.lastCheckin?.toDate?.()?.toDateString?.() || null;
+    const checkinBtn = document.querySelector('.checkin-task .task-btn');
+    if (last === today) {
+      if (checkinBtn) { checkinBtn.innerHTML='<i class="fa-solid fa-check"></i> Done'; checkinBtn.className='task-btn done'; checkinBtn.closest('.task-item').classList.add('completed'); }
+      return;
+    }
+    await updateDoc(doc(db,'users',uid), { balance:increment(CHECKIN_REWARD), lastCheckin:serverTimestamp() });
+    await addDoc(collection(db,'transactions'), { userId:uid, type:'checkin', amount:CHECKIN_REWARD, description:'Daily Check-in Bonus', createdAt:serverTimestamp() });
+    if (checkinBtn) { checkinBtn.innerHTML='<i class="fa-solid fa-check"></i> Done'; checkinBtn.className='task-btn done'; checkinBtn.closest('.task-item').classList.add('completed'); }
+    showToast(`+₦${CHECKIN_REWARD} daily check-in bonus! 🎉`,'success');
+  } catch(e) { console.log('Checkin error:',e); }
+}
+
+// ── COMPLETE TASK ──────────────────────────────
+window.completeTask = async function(btn, taskId, taskName) {
+  const user = auth.currentUser;
+  if (!user) { showToast('Please sign in','error'); return; }
+  try {
+    const uRef  = doc(db,'users',user.uid);
+    const uSnap = await getDoc(uRef);
+    const u     = uSnap.data();
+    if (!u?.premium) { showToast('Upgrade to Premium to earn from tasks 👑','info'); return; }
+    const done  = u.tasksCompleted || [];
+    if (done.includes(taskId)) { showToast('Already completed this task','info'); return; }
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    btn.disabled  = true;
+    await updateDoc(uRef, { balance:increment(TASK_REWARD), tasksCompleted:[...done,taskId] });
+    await addDoc(collection(db,'transactions'), { userId:user.uid, type:'task', amount:TASK_REWARD, description:`Task: ${taskName}`, createdAt:serverTimestamp() });
+    btn.innerHTML='<i class="fa-solid fa-check"></i> Done'; btn.className='task-btn done';
+    btn.closest('.task-item').classList.add('completed');
+    showToast(`+₦${TASK_REWARD} task reward! 💰`,'success');
+    const newSnap = await getDoc(uRef);
+    const walletEl = document.querySelector('.wc-balance');
+    if (walletEl) walletEl.textContent = '₦' + (newSnap.data().balance||0).toLocaleString();
+  } catch(e) { showToast('Error: '+e.message,'error'); btn.innerHTML='<i class="fa-solid fa-play"></i> Start'; btn.disabled=false; }
+};
+
+// ── WITHDRAWAL ─────────────────────────────────
+window.requestWithdrawal = async function() {
+  const user    = auth.currentUser;
+  if (!user) { showToast('Please sign in','error'); return; }
+  const bank    = document.querySelector('.bank-input')?.value?.trim();
+  const account = document.querySelector('.account-input')?.value?.trim();
+  const amount  = parseInt(document.querySelector('.amount-input')?.value);
+  if (!bank || !account) { showToast('Please fill in bank details','error'); return; }
+  if (!amount || amount < MIN_WITHDRAWAL) { showToast(`Minimum withdrawal is ₦${MIN_WITHDRAWAL.toLocaleString()}`,'error'); return; }
+  if (account.length !== 10) { showToast('Account number must be 10 digits','error'); return; }
+  try {
+    const uSnap   = await getDoc(doc(db,'users',user.uid));
+    const balance = uSnap.data().balance || 0;
+    if (balance < MIN_WITHDRAWAL) { showToast(`Balance too low. You have ₦${balance.toLocaleString()}`,'error'); return; }
+    if (amount > balance) { showToast(`Max you can withdraw is ₦${balance.toLocaleString()}`,'error'); return; }
+    const btn = document.querySelector('#withdrawModal .btn-primary');
+    if (btn) { btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Submitting...'; }
+    await updateDoc(doc(db,'users',user.uid), { balance:increment(-amount) });
+    await addDoc(collection(db,'withdrawals'), { userId:user.uid, userName:uSnap.data().name, userEmail:user.email, amount, bank, accountNumber:account, status:'pending', requestedAt:serverTimestamp() });
+    await addDoc(collection(db,'transactions'), { userId:user.uid, type:'withdrawal', amount, description:`Withdrawal — ${bank}`, createdAt:serverTimestamp() });
+    // WhatsApp notification to admin
+    const waMsg = encodeURIComponent(`🚨 *WITHDRAWAL REQUEST — LiusCine*
+
+👤 ${uSnap.data().name}
+📧 ${user.email}
+🏦 ${bank} · ${account}
+💰 ₦${amount.toLocaleString()}
+
+➡️ liuscine.vercel.app/admin-login.html`);
+    window.open(`https://wa.me/2349161976673?text=${waMsg}`,'_blank');
+    document.getElementById('withdrawModal').classList.remove('open');
+    showToast('Withdrawal submitted! Admin has been notified. Processing within 24hrs ✅','success');
+    const newSnap  = await getDoc(doc(db,'users',user.uid));
+    const walletEl = document.querySelector('.wc-balance');
+    if (walletEl) walletEl.textContent = '₦' + (newSnap.data().balance||0).toLocaleString();
+    if (btn) { btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-paper-plane"></i> Request Withdrawal'; }
+  } catch(e) { showToast('Error: '+e.message,'error'); }
+};
+
+// ── MOVIE REQUEST ──────────────────────────────
+window.submitMovieRequest = async function() {
+  const user  = auth.currentUser;
+  const input = document.querySelector('.movie-request-input');
+  if (!input?.value?.trim()) { showToast('Please enter a movie title','error'); return; }
+  if (!user) { showToast('Please sign in first','error'); return; }
+  try {
+    await addDoc(collection(db,'movieRequests'), { userId:user.uid, userName:user.displayName||user.email, title:input.value.trim(), status:'pending', requestedAt:serverTimestamp() });
+    input.value='';
+    showToast("Request sent! We'll add it soon ✅",'success');
+  } catch(e) { showToast('Error submitting request','error'); }
+};
+</script>
+
+<script>
+// ── TASK CONFIRM MODAL (non-module) ───────────
+let _currentTask = null;
+
+window.startTask = function(taskId, url, taskName) {
+  const btnMap = {'instagram':'btn-instagram','whatsapp-status':'btn-whatsapp','tiktok-share':'btn-tiktok'};
+  if (taskId === 'whatsapp-status') {
+    const refLink = document.getElementById('refLink')?.textContent || '';
+    const waMsg   = encodeURIComponent('🎬 Watch free Nollywood movies & earn real money on LiusCine!
+
+✅ 500+ free movies
+💰 Earn ₦500 per referral
+📥 HD downloads
+
+Join now 👇
+' + refLink);
+    window.open('https://wa.me/?text=' + waMsg, '_blank');
+  } else if (url) {
+    window.open(url, '_blank');
+  }
+  setTimeout(() => {
+    _currentTask = { taskId, taskName, btnId: btnMap[taskId] };
+    const icons = {'instagram':'<i class="fa-brands fa-instagram" style="color:#E1306C;font-size:40px"></i>','whatsapp-status':'<i class="fa-brands fa-whatsapp" style="color:#25D366;font-size:40px"></i>','tiktok-share':'<i class="fa-brands fa-tiktok" style="font-size:40px"></i>'};
+    const descs = {'instagram':'Have you followed <strong>@lius_creative</strong> on Instagram? ₦100 will be added to your wallet.','whatsapp-status':'Have you posted your referral link to your WhatsApp status? ₦100 will be added to your wallet.','tiktok-share':'Have you followed <strong>@liuscine</strong> on TikTok? ₦100 will be added to your wallet.'};
+    document.getElementById('taskModalIcon').innerHTML  = icons[taskId]||'<i class="fa-solid fa-check-circle" style="color:var(--accent);font-size:40px"></i>';
+    document.getElementById('taskModalTitle').textContent = taskName;
+    document.getElementById('taskModalDesc').innerHTML  = descs[taskId]||`Have you completed "${taskName}"?`;
+    document.getElementById('taskConfirmModal').classList.add('open');
+  }, 3000);
+};
+
+window.closeTaskModal = function() {
+  document.getElementById('taskConfirmModal').classList.remove('open');
+  _currentTask = null;
+};
+
+window.confirmTask = function() {
+  if (!_currentTask) return;
+  const { taskId, taskName, btnId } = _currentTask;
+  const confirmBtn = document.getElementById('taskConfirmBtn');
+  confirmBtn.disabled = true;
+  confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Crediting...';
+  const taskBtn = document.getElementById(btnId);
+  if (window.completeTask && taskBtn) window.completeTask(taskBtn, taskId, taskName);
+  closeTaskModal();
+  confirmBtn.disabled = false;
+  confirmBtn.innerHTML = '<i class="fa-solid fa-check"></i> Yes, I Did It!';
+};
+
+window.copyReferralLink = function() {
+  const link = document.getElementById('refLink')?.textContent || '';
+  if (!link || link === '—') { showToast('Upgrade to Premium to get your referral link 👑','info'); return; }
+  const ta = document.createElement('textarea');
+  ta.value = link; ta.style.cssText='position:fixed;left:-9999px;opacity:0;';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); showToast('Referral link copied! 🔗','success'); }
+  catch(e) { showToast('Please copy the link manually','warning'); }
+  document.body.removeChild(ta);
+};
+</script>
+</body>
+</html>

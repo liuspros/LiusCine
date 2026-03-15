@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LiusCine — Watch & Download Free Nollywood Movies</title>
+<meta name="description" content="Nigeria's #1 free Nollywood movie platform. Watch, download and earn real money by referring friends."/>
+<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  .hero { min-height:100vh; display:flex; align-items:center; padding:100px 48px 60px; position:relative; overflow:hidden; }
+  .hero-glow-1 { width:600px; height:600px; background:var(--purple-mid); top:-100px; right:-100px; }
+  .hero-glow-2 { width:400px; height:400px; background:var(--purple-deep); bottom:-100px; left:10%; }
+  .hero-grid { position:absolute; inset:0; background-image:linear-gradient(rgba(108,0,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(108,0,255,0.04) 1px,transparent 1px); background-size:60px 60px; mask-image:radial-gradient(ellipse 80% 80% at 50% 40%,black,transparent); }
+  .hero-content { position:relative; max-width:660px; animation:heroIn 0.9s ease both; }
+  @keyframes heroIn { from{opacity:0;transform:translateY(32px)} to{opacity:1;transform:translateY(0)} }
+  .hero h1 { font-size:clamp(44px,7vw,80px); font-weight:900; line-height:1.0; letter-spacing:-2px; margin:20px 0 24px; }
+  .hero h1 em { font-style:normal; color:var(--accent); display:block; }
+  .hero p { font-size:16px; color:var(--muted); line-height:1.8; font-weight:400; max-width:500px; margin-bottom:36px; }
+  .hero-btns { display:flex; gap:14px; flex-wrap:wrap; }
+  .hero-stats { display:flex; gap:40px; margin-top:56px; padding-top:32px; border-top:1px solid var(--border); animation:heroIn 0.9s 0.2s ease both; }
+  .stat-num { font-size:30px; font-weight:900; color:var(--accent); letter-spacing:-1px; display:block; }
+  .stat-lbl { font-size:11px; color:var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:0.5px; }
+  .hero-cards { position:absolute; right:40px; top:50%; transform:translateY(-50%); display:grid; grid-template-columns:1fr 1fr; gap:14px; width:380px; animation:heroIn 0.9s 0.15s ease both; }
+  .hero-card { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; cursor:pointer; transition:all 0.3s; }
+  .hero-card:hover { border-color:var(--accent); transform:translateY(-4px); }
+  .hero-card:nth-child(1) { margin-top:28px; }
+  .hero-card:nth-child(3) { margin-top:-20px; }
+  .hc-poster { aspect-ratio:2/3; display:flex; align-items:center; justify-content:center; font-size:36px; }
+  .hc-info { padding:8px 10px; }
+  .hc-title { font-size:11px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:3px; }
+  .hc-meta { font-size:10px; color:var(--muted); display:flex; justify-content:space-between; }
+  .announce { background:linear-gradient(90deg,var(--purple-deep),var(--purple-mid),var(--purple-deep)); background-size:200%; animation:gradMove 4s linear infinite; text-align:center; padding:10px 20px; font-size:13px; font-weight:600; color:#fff; }
+  @keyframes gradMove { 0%{background-position:0%} 100%{background-position:200%} }
+  .announce a { color:var(--gold); text-decoration:none; font-weight:700; }
+  .search-bar-wrap { background:var(--surface); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:36px 48px; text-align:center; }
+  .search-bar-wrap p { font-size:13px; color:var(--muted); margin-bottom:14px; }
+  .search-bar { display:flex; max-width:580px; margin:0 auto; }
+  .search-btn { padding:0 28px; background:var(--purple-mid); color:#fff; border:none; font-family:'Lexend',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:background 0.2s; }
+  .search-btn:hover { background:var(--purple-glow); }
+  .earn-sec { background:var(--surface); border-top:1px solid var(--border); border-bottom:1px solid var(--border); position:relative; overflow:hidden; }
+  .earn-sec::before { content:''; position:absolute; right:-80px; top:-80px; width:400px; height:400px; background:radial-gradient(circle,rgba(108,0,255,0.08),transparent); border-radius:50%; pointer-events:none; }
+  .earn-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; }
+  .earn-items { display:flex; flex-direction:column; gap:14px; }
+  .earn-item { display:flex; align-items:center; gap:16px; padding:16px 20px; background:var(--card); border:1px solid var(--border); border-radius:12px; transition:border-color 0.2s; }
+  .earn-item:hover { border-color:var(--accent); }
+  .earn-ico { width:44px; height:44px; background:rgba(108,0,255,0.1); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; color:var(--accent); flex-shrink:0; }
+  .earn-item-body { flex:1; }
+  .earn-item-title { font-size:13px; font-weight:700; margin-bottom:2px; }
+  .earn-item-sub { font-size:11px; color:var(--muted); }
+  .earn-amt { font-size:20px; font-weight:900; color:var(--green); letter-spacing:-0.5px; }
+  .wallet-widget { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:28px; }
+  .w-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
+  .w-label { font-size:11px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+  .w-balance { font-size:44px; font-weight:900; color:var(--accent); letter-spacing:-2px; }
+  .w-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+  .progress-wrap { margin:16px 0; }
+  .progress-labels { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:8px; }
+  .progress-track { height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--purple-mid),var(--purple-light)); border-radius:3px; }
+  .txn-list { display:flex; flex-direction:column; gap:8px; }
+  .txn { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--surface); border-radius:8px; font-size:12px; }
+  .txn-ico { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+  .txn-ico.plus { background:rgba(16,185,129,0.12); color:var(--green); }
+  .txn-ico.minus { background:rgba(239,68,68,0.12); color:var(--red); }
+  .txn-name { flex:1; color:var(--text2); font-weight:500; }
+  .txn-plus { color:var(--green); font-weight:700; }
+  .txn-minus { color:var(--red); font-weight:700; }
+  .steps-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; position:relative; }
+  .steps-grid::before { content:''; position:absolute; top:28px; left:12.5%; width:75%; height:1px; background:linear-gradient(90deg,transparent,var(--border2),var(--accent),var(--border2),transparent); }
+  .step-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px 20px; text-align:center; position:relative; transition:all 0.3s; }
+  .step-card:hover { border-color:var(--accent); transform:translateY(-4px); box-shadow:0 16px 40px rgba(108,0,255,0.15); }
+  .step-num { width:48px; height:48px; background:var(--bg); border:2px solid var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:900; color:var(--accent); margin:0 auto 18px; position:relative; z-index:1; }
+  .step-ico { font-size:28px; color:var(--accent); margin-bottom:12px; }
+  .step-title { font-size:14px; font-weight:700; margin-bottom:8px; }
+  .step-desc { font-size:12px; color:var(--muted); line-height:1.7; font-weight:400; }
+  .plan-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; max-width:720px; margin:0 auto; }
+  .plan-card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:36px 28px; position:relative; transition:all 0.3s; }
+  .plan-card:hover { transform:translateY(-4px); }
+  .plan-card.featured { border-color:var(--purple-mid); background:linear-gradient(160deg,#150025,var(--card)); box-shadow:0 0 48px rgba(108,0,255,0.15); }
+  .plan-popular { position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--purple-mid); color:#fff; font-size:10px; font-weight:700; padding:4px 14px; border-radius:100px; white-space:nowrap; }
+  .plan-name { font-size:12px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+  .plan-price { font-size:52px; font-weight:900; letter-spacing:-2px; line-height:1; margin-bottom:4px; }
+  .plan-price.free-price { color:var(--green); }
+  .plan-price.premium-price { color:var(--accent); }
+  .plan-period { font-size:12px; color:var(--muted); margin-bottom:28px; }
+  .plan-features { list-style:none; display:flex; flex-direction:column; gap:11px; margin-bottom:28px; }
+  .plan-features li { font-size:13px; color:var(--muted); display:flex; align-items:center; gap:10px; font-weight:400; }
+  .plan-features li.on { color:var(--text); }
+  .plan-features li i { width:14px; color:var(--border2); }
+  .plan-features li.on i { color:var(--green); }
+  @media(max-width:1024px){.hero-cards{display:none;}.earn-grid{grid-template-columns:1fr;gap:36px;}.steps-grid{grid-template-columns:1fr 1fr;}.steps-grid::before{display:none;}}
+  @media(max-width:768px){.hero{padding:90px 24px 60px;}.hero h1{font-size:40px;}.plan-grid{grid-template-columns:1fr;}.search-bar-wrap{padding:28px 20px;}}
+
+  @media(max-width:1100px){.hero-cards{display:none!important;}.earn-grid{grid-template-columns:1fr;gap:36px;}}
+  @media(max-width:900px){.steps-grid{grid-template-columns:1fr 1fr;gap:14px;}.steps-grid::before{display:none;}}
+  @media(max-width:768px){
+    .hero{padding:76px 16px 48px!important;min-height:auto!important;}
+    .hero h1{font-size:clamp(30px,9vw,48px)!important;letter-spacing:-1px!important;}
+    .hero p{font-size:14px!important;margin-bottom:24px!important;}
+    .hero-btns{gap:10px;}
+    .hero-stats{gap:16px;margin-top:28px;padding-top:20px;flex-wrap:wrap;}
+    .stat-num{font-size:22px!important;}
+    .search-bar-wrap{padding:20px 16px!important;}
+    .earn-item{padding:12px 14px;gap:10px;}
+    .earn-item-title{font-size:12px;}
+    .earn-amt{font-size:16px;}
+    .steps-grid{grid-template-columns:1fr 1fr;gap:10px;}
+    .step-card{padding:18px 10px;}
+    .step-ico{font-size:20px;}
+    .step-title{font-size:12px;}
+    .step-desc{font-size:10px;}
+    .plan-grid{grid-template-columns:1fr!important;max-width:360px;margin:0 auto;}
+    .wallet-widget{padding:16px;}
+    .w-balance{font-size:32px!important;}
+    .wallet-section-grid{grid-template-columns:1fr!important;gap:28px!important;}
+  }
+  @media(max-width:480px){
+    .hero{padding:68px 12px 36px!important;}
+    .hero h1{font-size:28px!important;}
+    .hero-btns{flex-direction:column;}
+    .hero-btns .btn{width:100%;justify-content:center;}
+    .hero-stats{display:grid!important;grid-template-columns:1fr 1fr;gap:14px;}
+    .search-bar{flex-direction:column;gap:8px;}
+    .search-bar .input{border-radius:10px;}
+    .search-btn{border-radius:10px;padding:13px;}
+    .earn-item-sub{display:none;}
+    .steps-grid{grid-template-columns:1fr!important;}
+    .plan-grid{max-width:100%!important;}
+    .plan-card{padding:24px 16px;}
+    .announce{font-size:11px;padding:8px 10px;}
+  }
+  @media(max-width:360px){
+    .hero h1{font-size:24px!important;}
+    .stat-num{font-size:18px!important;}
+    .section-title{font-size:20px!important;}
+  }
+
+
+  /* mobile nav — see NAVBAR MOBILE FIX below */
+
+
+  /* ── NAVBAR MOBILE FIX ── */
+  .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:8px 6px; background:none; border:none; z-index:1001; flex-shrink:0; }
+  .hamburger span { width:22px; height:2.5px; background:var(--text); border-radius:2px; transition:all 0.3s; display:block; }
+  .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity:0; transform:scaleX(0); }
+  .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+  .mobile-menu {
+    display:none; position:fixed; top:60px; left:0; right:0; bottom:0;
+    background:var(--bg2); border-bottom:1px solid var(--border);
+    padding:12px 16px; z-index:998; flex-direction:column; gap:2px;
+    overflow-y:auto; max-height:calc(100vh - 60px);
+  }
+  .mobile-menu.open { display:flex!important; }
+  .mobile-menu a {
+    display:flex; align-items:center; gap:14px; padding:14px 16px;
+    border-radius:10px; color:var(--text2); text-decoration:none;
+    font-size:15px; font-weight:600; transition:background 0.2s;
+  }
+  .mobile-menu a:hover { background:var(--card); color:var(--text); }
+  .mobile-menu a i { width:20px; text-align:center; color:var(--accent); font-size:16px; }
+  .mobile-menu-divider { height:1px; background:var(--border); margin:8px 0; }
+  .mobile-menu-actions { display:flex; gap:10px; padding:8px 0 4px; }
+  .mobile-menu-actions .btn { flex:1; justify-content:center; font-size:14px; padding:12px; }
+  @media(max-width:768px) {
+    .hamburger { display:flex!important; }
+    .nav-links { display:none!important; }
+    .nav-right { display:none!important; }
+  }
+
+</style>
+
+<script>
+// ── HOMEPAGE UPGRADE — plain script, accessible from onclick ──
+// This must NOT be type="module"
+window.homepageUpgrade = function() {
+  // Check if Paystack loaded
+  if (!window.PaystackPop) {
+    alert('Payment system is loading. Please wait 2 seconds and try again.');
+    return;
+  }
+
+  // Check if user is logged in via stored session
+  // We check localStorage for a Firebase auth token hint
+  const isLoggedIn = localStorage.getItem('firebase:authUser:' + 
+    Object.keys(localStorage).find(k => k.startsWith('firebase:authUser:'))?.split(':')[2] || 
+    'liuspros') !== null;
+
+  // Simpler check — just try to open Paystack, it will use email from prompt if needed
+  // Best UX: if not logged in, send to login first
+  const userDataKey = Object.keys(localStorage).find(k => k.includes('firebase') && k.includes('authUser'));
+  let userEmail = null;
+  if (userDataKey) {
+    try {
+      const userData = JSON.parse(localStorage.getItem(userDataKey));
+      userEmail = userData?.email || null;
+    } catch(e) {}
+  }
+
+  if (!userEmail) {
+    // Not logged in — go to login, then come back to upgrade
+    window.location.href = 'login.html?next=upgrade';
+    return;
+  }
+
+  // Logged in — open Paystack
+  const handler = window.PaystackPop.setup({
+    key:      'pk_live_051bcbe2840110639b09a2ef72b70fdbcf6a6220',
+    email:    userEmail,
+    amount:   100000, // ₦1,000 in kobo
+    currency: 'NGN',
+    ref:      'LC-PREM-' + Date.now(),
+    callback: function(response) {
+      // Payment done — redirect to dashboard which will handle upgrade
+      window.location.href = 'dashboard.html?upgraded=1&ref=' + response.reference;
+    },
+    onClose: function() {
+      // User closed payment — do nothing
+    }
+  });
+  handler.openIframe();
+};
+</script>
+
+
+
+<script>
+// ── MOBILE MENU ──
+window.toggleMenu = function() {
+  const menu = document.getElementById('mobileMenu');
+  const btn  = document.getElementById('hamburger');
+  if (!menu || !btn) return;
+  menu.classList.toggle('open');
+  btn.classList.toggle('open');
+  // Prevent body scroll when menu is open
+  document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+};
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('mobileMenu');
+  const btn  = document.getElementById('hamburger');
+  if (menu && btn && menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.classList.remove('open');
+    btn.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
+</script>
+
+<script type="module">
+// ── AUTH-AWARE NAVBAR ──
+// Update nav buttons based on login state
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+const _cfg = { apiKey:"AIzaSyBnPxRn13A1bEo901P8O3VE5X_nKvclFpI", authDomain:"liuspros.firebaseapp.com", projectId:"liuspros", storageBucket:"liuspros.firebasestorage.app", messagingSenderId:"1072846880138", appId:"1:1072846880138:web:d095b5196563844e9edc73" };
+const _app  = getApps().length > 0 ? getApp() : initializeApp(_cfg);
+const _auth = getAuth(_app);
+
+onAuthStateChanged(_auth, (user) => {
+  const navRight  = document.getElementById('navRight');
+  const mobileAuth = document.getElementById('mobileAuthButtons');
+
+  if (user) {
+    // Logged in — show Dashboard + Logout
+    if (navRight) navRight.innerHTML = `
+      <a href="dashboard.html" class="btn btn-ghost"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <button onclick="doSignOut()" class="btn btn-primary" style="background:transparent;border:1px solid var(--border2);color:var(--text2);">
+        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+      </button>
+    `;
+    if (mobileAuth) mobileAuth.innerHTML = `
+      <a href="dashboard.html"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="profile.html"><i class="fa-solid fa-user"></i> My Profile</a>
+      <a href="watchlist.html"><i class="fa-solid fa-bookmark"></i> Watchlist</a>
+      <div class="mobile-menu-divider"></div>
+      <div class="mobile-menu-actions">
+        <button onclick="doSignOut()" class="btn btn-ghost" style="flex:1;justify-content:center;"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+      </div>
+    `;
+  } else {
+    // Not logged in — show Sign In + Join Free
+    if (navRight) navRight.innerHTML = `
+      <a href="login.html" class="btn btn-ghost">Sign In</a>
+      <a href="login.html" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Join Free</a>
+    `;
+    if (mobileAuth) mobileAuth.innerHTML = `
+      <div class="mobile-menu-divider"></div>
+      <div class="mobile-menu-actions">
+        <a href="login.html" class="btn btn-ghost">Sign In</a>
+        <a href="login.html" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Join Free</a>
+      </div>
+    `;
+  }
+});
+
+window.doSignOut = async function() {
+  const { signOut } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js");
+  await signOut(_auth);
+  window.location.href = 'index.html';
+};
+</script>
+
+
+<script type="module">
+// ── Load movies from Firestore on homepage ──
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const CFG  = { apiKey:"AIzaSyBnPxRn13A1bEo901P8O3VE5X_nKvclFpI", authDomain:"liuspros.firebaseapp.com", projectId:"liuspros", storageBucket:"liuspros.firebasestorage.app", messagingSenderId:"1072846880138", appId:"1:1072846880138:web:d095b5196563844e9edc73" };
+const fapp = getApps().length > 0 ? getApp() : initializeApp(CFG);
+const db   = getFirestore(fapp);
+
+const POSTERS = ['poster-a','poster-b','poster-c','poster-d','poster-e','poster-f','poster-g','poster-h'];
+
+async function loadMovies(genre = '') {
+  const container = document.getElementById('moviesGridContainer');
+  if (!container) return;
+
+  container.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--muted);"><i class="fa-solid fa-spinner fa-spin" style="font-size:32px;display:block;margin-bottom:12px;"></i><p>Loading movies...</p></div>';
+
+  try {
+    let q;
+    if (genre) {
+      q = query(collection(db,'movies'), where('genre','==',genre), orderBy('createdAt','desc'), limit(6));
+    } else {
+      q = query(collection(db,'movies'), orderBy('createdAt','desc'), limit(6));
+    }
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      container.innerHTML = `
+        <div style="text-align:center;padding:64px 20px;">
+          <i class="fa-solid fa-film" style="font-size:64px;color:var(--border2);display:block;margin-bottom:16px;"></i>
+          <h3 style="font-size:18px;font-weight:800;margin-bottom:8px;">No movies yet</h3>
+          <p style="font-size:14px;color:var(--muted);font-weight:400;">Movies will appear here once the admin adds them.</p>
+        </div>`;
+      // Also clear hero cards
+      const heroCards = document.getElementById('heroCards');
+      if (heroCards) heroCards.style.display = 'none';
+      return;
+    }
+
+    const movies = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // Fill hero floating cards with first 4 movies
+    const heroCards = document.getElementById('heroCards');
+    if (heroCards && movies.length > 0) {
+      heroCards.innerHTML = movies.slice(0, 4).map((m, i) => `
+        <div class="hero-card" onclick="window.location.href='movie.html?id=${m.id}'">
+          <div class="hc-poster ${POSTERS[i]}">
+            ${m.posterUrl ? `<img src="${m.posterUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"/>` : `<i class="fa-solid fa-film" style="font-size:32px;color:rgba(139,92,246,0.4)"></i>`}
+          </div>
+          <div class="hc-info">
+            <div class="hc-title">${m.title||'Unknown'}</div>
+            <div class="hc-meta"><span>${m.year||''}</span><span style="color:var(--gold)"><i class="fa-solid fa-star"></i> ${m.rating||'—'}</span></div>
+          </div>
+        </div>`).join('');
+    }
+
+    // Build movies grid
+    const grid = document.createElement('div');
+    grid.className = 'movies-grid reveal';
+
+    grid.innerHTML = movies.map((m, i) => {
+      const badge = m.access === 'premium'
+        ? '<span class="badge badge-premium">PREMIUM</span>'
+        : i === 0 ? '<span class="badge badge-new">NEW</span>'
+        : '<span class="badge badge-free">FREE</span>';
+
+      return `<div class="movie-card" onclick="window.location.href='movie.html?id=${m.id}'">
+        <div class="movie-poster ${POSTERS[i % POSTERS.length]}">
+          ${m.posterUrl ? `<img src="${m.posterUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'"/>` : `<i class="fa-solid fa-film" style="font-size:36px;color:rgba(139,92,246,0.3)"></i>`}
+          <div class="movie-card-badges">${badge}</div>
+          <div class="movie-overlay"><div class="play-circle"><i class="fa-solid fa-play"></i></div></div>
+        </div>
+        <div class="movie-info">
+          <div class="movie-title">${m.title||'Unknown'}</div>
+          <div class="movie-meta"><span>${m.year||''} · ${m.genre||''}</span><span class="movie-rating"><i class="fa-solid fa-star"></i> ${m.rating||'—'}</span></div>
+        </div>
+      </div>`;
+    }).join('');
+
+    container.innerHTML = '';
+    container.appendChild(grid);
+
+    // Trigger reveal animation
+    setTimeout(() => grid.classList.add('visible'), 100);
+
+  } catch(e) {
+    console.error('Movies load error:', e);
+    container.innerHTML = '<div style="text-align:center;padding:48px;color:var(--muted)"><i class="fa-solid fa-triangle-exclamation" style="font-size:32px;display:block;margin-bottom:12px;"></i><p>Could not load movies. Check your connection.</p></div>';
+  }
+}
+
+// Genre filter
+document.addEventListener('DOMContentLoaded', () => {
+  loadMovies();
+  document.querySelectorAll('#genrePills .genre-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('#genrePills .genre-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      loadMovies(pill.dataset.genre || '');
+    });
+  });
+});
+</script>
+
+</body>
+</html>
